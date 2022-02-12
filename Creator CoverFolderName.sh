@@ -3,20 +3,39 @@
 ## -----===== Start of bash =====-----
 	#printf '\033[8;30;80t'		# will resize the window, if needed.
 	printf '\033[8;40;80t'		# will resize the window, if needed.
-	#printf '\033[8;40;125t'	# will resize the window, if needed.
+	#printf '\033[8;40;100t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
+	sleep 0.25
+	
 echo -------------------------========================-------------------------
 ## Software lead-in
-	red=`tput setaf 1`
-	green=`tput setaf 2`
-	yellow=`tput setaf 3`
-	reset=`tput sgr0`
 	start=$SECONDS
 	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
 	echo "Current time : $now"
-	echo
-	echo Version compiled on : Also serves as a version
-	echo 2022-02-03_Thursday_04:43:34
+	red=`tput setaf 1`
+	green=`tput setaf 2`
+	yellow=`tput setaf 11`
+	reset=`tput sgr0`
+
+echo -------------------------========================-------------------------
+echo Function Error detector. If errorlevel is 1 or greater will show error msg.
+	error()
+	{
+	if [ "$?" -ge 1 ]; then
+		echo
+		echo "${red}ERROR █████████████████████████████ ERROR █████████████████████████████ ERROR ${reset}"
+		echo
+		echo "!!! ERROR was detected !!! Press ENTER key to try to CONTINUE !!! Will probably exit !!!"
+		echo
+		echo "This script take $(( SECONDS - start )) seconds to complete."
+		date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
+		echo "Time needed: $date"
+		echo
+		read -n 1 -s -r -p "Press any key to continue"
+		echo
+	fi
+	}
+
 echo -------------------------========================-------------------------
 ## Software name, what is this, version, informations.
 	echo "Software name: Creator CoverFolderName.sh"
@@ -100,6 +119,7 @@ echo -------------------------========================-------------------------
 	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
 	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
 	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
+	error $?
 
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
@@ -110,15 +130,7 @@ echo -------------------------========================-------------------------
 	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
 	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
 	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-
-## Error detector.
-if [ "$?" -ge 1 ]; then
-	echo "!!! ERROR was detected !!! Press ENTER key to terminate !!!"
-	echo
-	echo "${red}ERROR ███████████████████████████ ERROR █████████████████████████████ ERROR ${reset}"
-	read name
-	exit
-fi
+	error $?
 	
 echo -------------------------========================-------------------------
 ## Software lead-out.

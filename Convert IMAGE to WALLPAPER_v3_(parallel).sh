@@ -2,8 +2,8 @@
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
 	#printf '\033[8;30;80t'		# will resize the window, if needed.
-	#printf '\033[8;40;80t'		# will resize the window, if needed.
-	printf '\033[8;40;100t'	# will resize the window, if needed.
+	printf '\033[8;40;80t'		# will resize the window, if needed.
+	#printf '\033[8;40;100t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
 	sleep 0.25
 	
@@ -12,27 +12,27 @@ echo -------------------------========================-------------------------
 	start=$SECONDS
 	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
 	echo "Current time : $now"
-	echo
 	red=`tput setaf 1`
 	green=`tput setaf 2`
-	yellow=`tput setaf 4`
+	yellow=`tput setaf 11`
 	reset=`tput sgr0`
 
 echo -------------------------========================-------------------------
 echo Function Error detector. If errorlevel is 1 or greater will show error msg.
-
 	error()
 	{
 	if [ "$?" -ge 1 ]; then
 		echo
 		echo "${red}ERROR █████████████████████████████ ERROR █████████████████████████████ ERROR ${reset}"
 		echo
-		echo "!!! ERROR was detected !!! Press ENTER key to CONTINUE !!!"
+		echo "!!! ERROR was detected !!! Press ENTER key to try to CONTINUE !!! Will probably exit !!!"
 		echo
 		echo "This script take $(( SECONDS - start )) seconds to complete."
 		date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
 		echo "Time needed: $date"
-		read name
+		echo
+		read -n 1 -s -r -p "Press any key to continue"
+		echo
 	fi
 	}
 
@@ -66,23 +66,11 @@ echo -------------------------========================-------------------------
 	echo "Bash, imagemagick and parallel are used."
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
-
-echo -------------------------========================-------------------------
+	echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2022-02-10_Thursday_02:07:47
+	echo 2022-02-12_Saturday_02:31:14
 echo -------------------------========================-------------------------
 echo "Check installed requirements !"
-
-if command -v imagemagick >/dev/null 2>&1
-	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
-		echo -------------------------========================-------------------------
-		sleep 10
-		exit
-	else
-		echo "imagemagick installed continue."
-fi
 
 if command -v parallel >/dev/null 2>&1
 	then
@@ -95,20 +83,31 @@ if command -v parallel >/dev/null 2>&1
 		exit
 fi
 
+if command -v imagemagick >/dev/null 2>&1
+	then
+		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install imagemagick"
+		echo -------------------------========================-------------------------
+		sleep 10
+		exit
+	else
+		echo "imagemagick installed continue."
+fi
+
 echo -------------------------========================-------------------------
-echo "Enter numbers of cores to use ?"
+echo "Enter cores to use ?"
 	cpu=$(nproc)
 	def=$(( cpu / 2 ))
+#entry=$(zenity --entry --width 500 --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have $cpu cores !\n\nDefault value is $def\n\n(1 to whatever core you want to use)")
 
-entry=$(zenity --scale --value="$def" --min-value="1" --max-value="$cpu" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have $cpu cores !\n\nDefault value is $def, it is suggested you only use real cores.\n\n(1 to whatever core you want to use)")
+#entry=$(zenity --scale --value="$def" --min-value="1" --max-value="$cpu" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have $cpu cores !\n\nDefault value is $def, it is suggested you only use real cores.\n\n(1 to whatever core you want to use)")
 
 if test -z "$entry"
 	then
-		echo "Default value of $cpu / 2 will be used. Now continue in 1 seconds."
+		echo "Default value of $cpu / 2 will be used. Now continue in 3 seconds."
 		entry=$(( cpu / 2 ))
-		#entry=$(nproc)
 		echo "You have selected : $entry"
-		sleep 0.25
+		#sleep 3
 	else
 		echo "You have selected : $entry"
 fi
@@ -124,8 +123,8 @@ if test -z "$file"
 	then
 		echo "You don't have selected a file, now exit in 3 seconds."
 		echo -------------------------========================-------------------------
-		# sleep 3
-		#exit
+		sleep 3
+		exit
 	else
 		echo "You have selected :"
 		echo "$file"
@@ -144,9 +143,10 @@ echo "Input name, directory and output name : (Debug helper)"
 ## Output file name
 	name=`echo "$file" | rev | cut -f 2- -d '.' | rev` ## remove extension
 	echo "Output name ext : "$name""
-	#name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	#echo "Output name bis : "$name1""
+	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
+	echo "Output name bis : "$name1""
 	
+echo -------------------------========================-------------------------
 echo -------------------------========================-------------------------
 ## Variables, for program.
 	part=0
@@ -226,8 +226,6 @@ input="/dev/shm/findfiles.txt"
 	convert "$line" -resize 3840x1080^ -gravity center -crop 3840x1080+0+0 +repage "$line"-para-3840x1080.jpg
 	done < "$input"
 	error $?
-
-echo -------------------------========================-------------------------
 ## Software lead-out.
 	echo "Finish... with numbers of actions : $part"
 	echo "This script take $(( SECONDS - start )) seconds to complete."
