@@ -37,11 +37,14 @@ echo Function Error detector. If errorlevel is 1 or greater will show error msg.
 	}
 
 echo -------------------------========================-------------------------
-## Software name, what is this, version, informations.
-	echo "Software name: Convert to JPG"
-	echo "File name : Convert to JPG.sh"
+	echo Version compiled on : Also serves as a version
+	echo 2022-02-12_Saturday_06:57:31
 	echo
-	echo "What it does ? Convert 1 image or all folder to JPG format."
+## Software name, what is this, version, informations.
+	echo "Software name: Auto-compiler software"
+	echo "File name : file name.sh"
+	echo
+	echo "What it does ? Make an program of all contents with sources."
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
 	echo "By LostByteSoft, no copyright or copyleft."
@@ -49,10 +52,18 @@ echo -------------------------========================-------------------------
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
-	echo Version compiled on : Also serves as a version
-	echo 2022-02-10_Thursday_04:30:03
-echo -------------------------========================-------------------------
-echo "Check installed requirement !"
+echo "Check installed requirements !"
+
+if command -v parallel >/dev/null 2>&1
+	then
+		echo "Parallel installed continue."
+	else
+		echo "You don't have ' parallel ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install parallel"
+		echo -------------------------========================-------------------------
+		sleep 10
+		exit
+fi
 
 if command -v imagemagick >/dev/null 2>&1
 	then
@@ -64,11 +75,28 @@ if command -v imagemagick >/dev/null 2>&1
 	else
 		echo "imagemagick installed continue."
 fi
+
+echo -------------------------========================-------------------------
+echo "Enter cores to use ?"
+	cpu=$(nproc)
+	def=$(nproc)
+#entry=$(zenity --scale --value="$def" --min-value="1" --max-value="$cpu" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have $cpu cores !\n\nDefault value is $def, it is suggested you only use real cores.\n\n(1 to whatever core you want to use)")
+
+if test -z "$entry"
+	then
+		echo "Default value of $cpu will be used. Now continue in 3 seconds."
+		entry=$(nproc)
+		echo "You have selected : $entry"
+		#sleep 3
+	else
+		echo "You have selected : $entry"
+fi
+
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all image format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -81,6 +109,7 @@ if test -z "$file"
 		echo "You have selected :"
 		echo "$file"
 fi
+
 echo -------------------------========================-------------------------
 echo "Input name, directory and output name : (Debug helper)"
 ## Set working path.
@@ -94,7 +123,7 @@ echo "Input name, directory and output name : (Debug helper)"
 	echo
 ## Output file name
 	name=`echo "$file" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	echo "Output name ext : "$name"_1"
+	echo "Output name ext : "$name""
 	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
 	echo "Output name bis : "$name1""
 	
@@ -103,12 +132,23 @@ echo -------------------------========================-------------------------
 	part=0
 
 ## The code program.
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "convert $file -quality 90 "$name"_1.jpg"
-	convert $file -quality 95 -format jpg "$name"_1.jpg
-	error $?
 
+## PARALLEL CONVERT BUT DOES NOT LOVE SPACES IN NAMES
+#for i in $file/*.*;
+#	do name=`echo "$i"`
+#	echo ""${name}"_convert.jpg"
+#	parallel -j $entry convert "$i" -quality 90 -format jpg ::: ""${name}"_convert.jpg"
+#	error $?
+#done
+
+# NO PARALLEL CODE
+for i in $file/*.*;
+	do name=`echo "$i"`
+	echo "${name}_convert.jpg"
+	convert "$i" -quality 90 -format jpg "${name}_convert.jpg"
+	error $?
+done
+	
 echo -------------------------========================-------------------------
 ## Software lead-out.
 	echo "Finish... with numbers of actions : $part"

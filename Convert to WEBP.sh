@@ -2,10 +2,10 @@
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
 	#printf '\033[8;30;80t'		# will resize the window, if needed.
-	printf '\033[8;40;80t'		# will resize the window, if needed.
-	#printf '\033[8;40;100t'	# will resize the window, if needed.
+	#printf '\033[8;40;80t'		# will resize the window, if needed.
+	printf '\033[8;40;100t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
-	sleep 0.25
+	sleep 0.50
 	
 echo -------------------------========================-------------------------
 ## Software lead-in
@@ -18,25 +18,9 @@ echo -------------------------========================-------------------------
 	reset=`tput sgr0`
 
 echo -------------------------========================-------------------------
-echo Function Error detector. If errorlevel is 1 or greater will show error msg.
-	error()
-	{
-	if [ "$?" -ge 1 ]; then
-		echo
-		echo "${red}ERROR █████████████████████████████ ERROR █████████████████████████████ ERROR ${reset}"
-		echo
-		echo "!!! ERROR was detected !!! Press ENTER key to try to CONTINUE !!! Will probably exit !!!"
-		echo
-		echo "This script take $(( SECONDS - start )) seconds to complete."
-		date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
-		echo "Time needed: $date"
-		echo
-		read -n 1 -s -r -p "Press any key to continue"
-		echo
-	fi
-	}
-
-echo -------------------------========================-------------------------
+	echo Version compiled on : Also serves as a version
+	echo 2022-02-16_Wednesday_03:36:23
+	echo
 ## Software name, what is this, version, informations.
 	echo "Software name: Convert to JPG"
 	echo "File name : Convert to JPG.sh"
@@ -49,10 +33,39 @@ echo -------------------------========================-------------------------
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
-	echo Version compiled on : Also serves as a version
-	echo 2022-02-10_Thursday_04:30:03
+echo Function Debug.
+	debug()
+	{
+	if [ "$debug" -ge 1 ]; then
+		echo
+		echo "${yellow}DEBUG █████████████████████████████ DEBUG █████████████████████████████ DEBUG ${reset}"
+		echo
+		read -n 1 -s -r -p "Press any key to continue"
+		echo
+	fi
+	}
+
 echo -------------------------========================-------------------------
-echo "Check installed requirement !"
+echo Function Error detector. If errorlevel is 1 or greater will show error msg.
+	error()
+	{
+	if [ "$?" -ge 1 ]; then
+		echo
+		echo "${red}ERROR █████████████████████████████ ERROR █████████████████████████████ ERROR ${reset}"
+		echo
+		echo "!!! ERROR was detected !!! Press ANY key to try to CONTINUE !!! Will probably exit !!!"
+		echo
+		echo "This script take $(( SECONDS - start )) seconds to complete."
+		date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
+		echo "Time needed: $date"
+		echo
+		read -n 1 -s -r -p "Press any key to continue"
+		echo
+	fi
+	}
+
+echo -------------------------========================-------------------------
+echo "Check installed requirements !"
 
 if command -v imagemagick >/dev/null 2>&1
 	then
@@ -63,11 +76,13 @@ if command -v imagemagick >/dev/null 2>&1
 		exit
 	else
 		echo "imagemagick installed continue."
+		dpkg -s imagemagick | grep Version
 fi
+
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all image format supported")"
+	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
 	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
 	## --file-filter="*.jpg *.gif"
 
@@ -94,20 +109,22 @@ echo "Input name, directory and output name : (Debug helper)"
 	echo
 ## Output file name
 	name=`echo "$file" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	echo "Output name ext : "$name"_1"
+	echo "Output name ext : "$name""
 	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
 	echo "Output name bis : "$name1""
 	
 echo -------------------------========================-------------------------
 ## Variables, for program."
 	part=0
+	debug=0
 
 ## The code program.
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "convert $file -quality 90 "$name"_1.jpg"
-	convert $file -quality 95 -format jpg "$name"_1.jpg
+	echo convert $file -format webp "$name".webp
+	convert $file -format webp "$name".webp
 	error $?
+	debug $?
 
 echo -------------------------========================-------------------------
 ## Software lead-out.
@@ -119,13 +136,14 @@ echo -------------------------========================-------------------------
 	echo "Current time : $now"
 echo -------------------------========================-------------------------
 ## Press enter or auto-quit here.
-	echo "If a script takes MORE than 120 seconds to complete it will ask you to"
-	echo "press ENTER to terminate."
+	echo "${yellow}If a script takes MORE than 120 seconds to complete it will ask you to take action !${reset}"
+	echo "Press ENTER to terminate."
 	echo
-	echo "If a script takes LESS than 120 seconds to complete it will auto"
-	echo "terminate after 10 seconds"
+	echo "${green}If a script takes LESS than 120 seconds to complete it will auto-terminate !${reset}"
+	echo "Auto-terminate after 10 seconds"
 	echo
 
+echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
 if [ $(( SECONDS - start )) -gt 120 ]
 then
@@ -139,6 +157,7 @@ else
 	echo "Auto-quit in 10 sec. (You can press X)"
 	echo
 	echo "${green}████████████████████████████████ Finish ██████████████████████████████████${reset}"
+	debug $?
 	sleep 10
 fi
 	exit

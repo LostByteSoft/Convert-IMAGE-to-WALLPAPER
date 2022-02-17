@@ -2,10 +2,10 @@
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
 	#printf '\033[8;30;80t'		# will resize the window, if needed.
-	printf '\033[8;40;80t'		# will resize the window, if needed.
-	#printf '\033[8;40;100t'	# will resize the window, if needed.
+	#printf '\033[8;40;80t'		# will resize the window, if needed.
+	printf '\033[8;40;100t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
-	sleep 0.25
+	sleep 0.5
 	
 echo -------------------------========================-------------------------
 ## Software lead-in
@@ -37,11 +37,28 @@ echo Function Error detector. If errorlevel is 1 or greater will show error msg.
 	}
 
 echo -------------------------========================-------------------------
-## Software name, what is this, version, informations.
-	echo "Software name: Convert to JPG"
-	echo "File name : Convert to JPG.sh"
+echo Function Debug.
+	debug()
+	{
+	if [ "$debug" -ge 1 ]; then
+		echo
+		echo "${yellow}DEBUG █████████████████████████████ DEBUG █████████████████████████████ DEBUG ${reset}"
+		echo
+		read -n 1 -s -r -p "Press any key to continue"
+		echo
+	fi
+	}
+
+echo -------------------------========================-------------------------
+	echo Version compiled on : Also serves as a version
+	echo 2022-02-16_Wednesday_11:58:53
 	echo
-	echo "What it does ? Convert 1 image or all folder to JPG format."
+## Software name, what is this, version, informations.
+	echo "Software name: Convert ALL images to WEBP"
+	echo "File name : Convert ALL to WEBP (parallel).sh"
+	echo
+	echo "What it does ?  Convert ALL to WEBP image format."
+	echo "Use folder select"
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
 	echo "By LostByteSoft, no copyright or copyleft."
@@ -49,10 +66,7 @@ echo -------------------------========================-------------------------
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
-	echo Version compiled on : Also serves as a version
-	echo 2022-02-10_Thursday_04:30:03
-echo -------------------------========================-------------------------
-echo "Check installed requirement !"
+echo "Check installed requirements !"
 
 if command -v imagemagick >/dev/null 2>&1
 	then
@@ -63,12 +77,42 @@ if command -v imagemagick >/dev/null 2>&1
 		exit
 	else
 		echo "imagemagick installed continue."
+		dpkg -s imagemagick | grep Version
 fi
+
+if command -v parallel >/dev/null 2>&1
+	then
+		echo "Parallel installed continue."
+		dpkg -s parallel | grep Version
+	else
+		echo "You don't have ' parallel ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install parallel"
+		echo -------------------------========================-------------------------
+		sleep 10
+		exit
+fi
+
+echo -------------------------========================-------------------------
+echo "Enter cores to use ?"
+	cpu=$(nproc)
+	def=$(( cpu / 2 ))
+	#entry=$(zenity --scale --value="$def" --min-value="1" --max-value="$cpu" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have $cpu cores !\n\nDefault value is $def, it is suggested you only use real cores.\n\n(1 to whatever core you want to use)")
+
+if test -z "$entry"
+	then
+		echo "Default value of $cpu / 2 will be used. Now continue in 3 seconds."
+		entry=$def
+		echo "You have selected : $entry"
+		#sleep 3
+	else
+		echo "You have selected : $entry"
+fi
+
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all image format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file, will auto select only IMAGE files to convert but not webp." --directory)
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -81,6 +125,7 @@ if test -z "$file"
 		echo "You have selected :"
 		echo "$file"
 fi
+
 echo -------------------------========================-------------------------
 echo "Input name, directory and output name : (Debug helper)"
 ## Set working path.
@@ -94,20 +139,63 @@ echo "Input name, directory and output name : (Debug helper)"
 	echo
 ## Output file name
 	name=`echo "$file" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	echo "Output name ext : "$name"_1"
+	echo "Output name ext : "$name""
 	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
 	echo "Output name bis : "$name1""
 	
 echo -------------------------========================-------------------------
 ## Variables, for program."
 	part=0
-
+	debug=0
+	rm "/dev/shm/findfiles.txt"
 ## The code program.
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "convert $file -quality 90 "$name"_1.jpg"
-	convert $file -quality 95 -format jpg "$name"_1.jpg
+
+## find files
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo Finding files...
+
+	## Easy way to add a file format, copy paste a new line.
+	echo "Will find files in sub folders too...."
+	find $file -name '*.png'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.jpg'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.bmp'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
+	#find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
+	cat "/dev/shm/findfiles.txt"
+
+echo Finding finish.
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+
+	if zenity --question --text="Do you want simple convert (yes) or parallel convert (no) ?"
+	#if zenity --text="Do you want simple convert (yes) or parallel convert (no) ?"
+	then #yes
+	echo Conversion started...
+	echo "Simple convert"
+	{
+	input="/dev/shm/findfiles.txt"
+		while IFS= read -r line
+		do
+		echo "$line"_convert.webp
+		convert $line -format webp "$line"_convert.webp
+		done < "$input"
 	error $?
+	}
+	else #no
+	echo Conversion started...
+	echo "Parallel convert"
+	parallel -j $entry convert {} -format webp {}_convert.webp ::: "$file"/*.*
+	error $?
+	fi
+
+echo Conversion finish...
+
+	debug $?
 
 echo -------------------------========================-------------------------
 ## Software lead-out.
@@ -140,6 +228,7 @@ else
 	echo
 	echo "${green}████████████████████████████████ Finish ██████████████████████████████████${reset}"
 	sleep 10
+	debug $?
 fi
 	exit
 ## -----===== End of bash =====-----
