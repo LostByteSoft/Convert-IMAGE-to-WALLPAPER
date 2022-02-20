@@ -2,10 +2,10 @@
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
 	#printf '\033[8;30;80t'		# will resize the window, if needed.
-	printf '\033[8;40;80t'		# will resize the window, if needed.
-	#printf '\033[8;40;100t'	# will resize the window, if needed.
+	#printf '\033[8;40;80t'		# will resize the window, if needed.
+	printf '\033[8;40;100t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
-	sleep 0.25
+	sleep 0.50
 	
 echo -------------------------========================-------------------------
 ## Software lead-in
@@ -25,7 +25,7 @@ echo Function Error detector. If errorlevel is 1 or greater will show error msg.
 		echo
 		echo "${red}ERROR █████████████████████████████ ERROR █████████████████████████████ ERROR ${reset}"
 		echo
-		echo "!!! ERROR was detected !!! Press ENTER key to try to CONTINUE !!! Will probably exit !!!"
+		echo "!!! ERROR was detected !!! Press ANY key to try to CONTINUE !!! Will probably exit !!!"
 		echo
 		echo "This script take $(( SECONDS - start )) seconds to complete."
 		date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
@@ -37,9 +37,25 @@ echo Function Error detector. If errorlevel is 1 or greater will show error msg.
 	}
 
 echo -------------------------========================-------------------------
+echo Function Debug. Activate via source program debug=1.
+	debug()
+	{
+	if [ "$debug" -ge 1 ]; then
+		echo
+		echo "${yellow}DEBUG █████████████████████████████ DEBUG █████████████████████████████ DEBUG ${reset}"
+		echo
+		read -n 1 -s -r -p "Press any key to continue"
+		echo
+	fi
+	}
+
+echo -------------------------========================-------------------------
+	echo Version compiled on : Also serves as a version
+	echo 2022-02-16_Wednesday_05:03:27
+	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Wallpaper creator V2"
-	echo "File name : Convert IMAGE to WALLPAPER_v2.sh"
+	echo "Software name: Wallpaper creator V3 (parallel)"
+	echo "File name : Convert IMAGE to WALLPAPER_v3_(parallel).sh"
 	echo What it does ?
 	echo "You specify ONE directory and this convert to all"
 	echo "resolution conversion in parallel."
@@ -55,10 +71,11 @@ echo -------------------------========================-------------------------
 	echo ex: mem 12GiB , disk 64GiB
 	echo
 	echo Need GNU parallel to work.
-	echo No more black bar.
 	echo
 	echo "!!! Convert IMAGE to WALLPAPER_v2.sh is the best to use. !!!"
 	echo
+	echo This software DOES NOT SUPPORT spaces in names ...
+	echo No more black bar.
 	echo "Create centered image"
 	echo "Create RESOLUTION images files for wallpaper"
 	echo
@@ -77,12 +94,42 @@ if command -v imagemagick >/dev/null 2>&1
 		exit
 	else
 		echo "imagemagick installed continue."
+		dpkg -s imagemagick | grep Version
 fi
+
+if command -v parallel >/dev/null 2>&1
+	then
+		echo "Parallel installed continue."
+		dpkg -s parallel | grep Version
+	else
+		echo "You don't have ' parallel ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install parallel"
+		echo -------------------------========================-------------------------
+		sleep 10
+		exit
+fi
+
+echo -------------------------========================-------------------------
+echo "Enter cores to use ?"
+	cpu=$(nproc)
+	def=$(( cpu / 2 ))
+	entry=$(zenity --scale --value="$def" --min-value="1" --max-value="$cpu" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have $cpu cores !\n\nDefault value is $def, it is suggested you only use real cores.\n\n(1 to whatever core you want to use)")
+
+if test -z "$entry"
+	then
+		echo "Default value of $cpu / 2 will be used. Now continue in 3 seconds."
+		entry=$(( cpu / 2 ))
+		echo "You have selected : $entry"
+		#sleep 3
+	else
+		echo "You have selected : $entry"
+fi
+
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -95,7 +142,7 @@ if test -z "$file"
 		echo "You have selected :"
 		echo "$file"
 fi
-
+echo -------------------------========================-------------------------
 echo "Input name, directory and output name : (Debug helper)"
 ## Set working path.
 	dir=$(pwd)
@@ -115,57 +162,89 @@ echo "Input name, directory and output name : (Debug helper)"
 echo -------------------------========================-------------------------
 ## Variables, for program.
 	part=0
+	debug=1
+	rm "/dev/shm/findfiles.txt"
 	
-	if zenity --question --text="Convert only your screen resulution ?"
-	then
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	res=$(xdpyinfo | awk '/dimensions/{print $2}')
-	echo "$res resolution"
-	convert "$file" -resize $res^ -gravity center -crop $res+0+0 +repage "$name"-$res.jpg
-		error $?
-	else
-
-echo "Code start"
+	## Working examples
+	#convert "$line" -resize 640x480^ -gravity center -crop 640x480+0+0 +repage "$line"-para-640x480.jpg
+	#convert "$line" -resize 800x600^ -gravity center -crop 800x600+0+0 +repage "$line"-para-800x600.jpg
+	#convert "$line" -resize 1024x768^ -gravity center -crop 1024x768+0+0 +repage "$line"-para-1024x768.jpg
+	#convert "$line" -resize 1600x1200^ -gravity center -crop 1600x1200+0+0 +repage "$line"-para-1600x1200.jpg
 
 	# 3840x2160 4k
 	# 7680x4320 8k
-	# 15360×8640 16k
-	
+	# 15360x8640 16k
+
+## find files
 	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"	
+	echo "-------------------------===== Section $part =====-------------------------"
+	echo Finding files...
+	
+	## Easy way to add a file format, copy paste a new line.
+	
+	find $file -name '*.png'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.jpg'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.bmp'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
+	error $?
+	
+	cat "/dev/shm/findfiles.txt"
+
+echo Finding finish.
+
+debug $?
+
+	part=$((part+1))
+	echo "-------------------------===== Section $part =====-------------------------"
+echo "Code start, all resolution conversion in parallel."
+
+	part=$((part+1))
+	echo "-------------------------===== Section $part =====-------------------------"
 	echo "4/3 resolution"
-	#convert "$file" -resize 800x600^ -gravity center -crop 800x600+0+0 +repage "$name"-800x600.jpg
-	#convert "$file" -resize 1024x768^ -gravity center -crop 1024x768+0+0 +repage "$name"-1024x768.jpg
-	#convert "$file" -resize 1600x1200^ -gravity center -crop 1600x1200+0+0 +repage "$name"-1600x1200.jpg
-		error $?
+input="/dev/shm/findfiles.txt"
+	while IFS= read -r "line"
+	do
+	echo "$line"
+	parallel -j $entry ::: "convert "$line" -resize 640x480^ -gravity center -crop 640x480+0+0 +repage "$line"-para-640x480.jpg" "convert "$line" -resize 800x600^ -gravity center -crop 800x600+0+0 +repage "$line"-para-800x600.jpg" "convert "$line" -resize 1024x768^ -gravity center -crop 1024x768+0+0 +repage "$line"-para-1024x768.jpg" "convert "$line" -resize 1600x1200^ -gravity center -crop 1600x1200+0+0 +repage "$line"-para-1600x1200.jpg"
+	done < "$input"
+	error $?
 	
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
 	echo "16/10 resolution"
-	#convert "$file" -resize 1280x800^ -gravity center -crop 1280x800+0+0 +repage "$name"-1280x800.jpg
-	#convert "$file" -resize 1680x1050^ -gravity center -crop 1680x1050+0+0 +repage "$name"-1680x1050.jpg
-		error $?
+input="/dev/shm/findfiles.txt"
+	while IFS= read -r "line"
+	do
+	echo "$line"
+	parallel -j $entry ::: "convert "$line" -resize 1280x800^ -gravity center -crop 1280x800+0+0 +repage "$line"-para-1280x800.jpg" "convert "$line" -resize 1680x1050^ -gravity center -crop 1680x1050+0+0 +repage "$line"-para-1680x1050.jpg" "convert "$line" -resize 1920x1200^ -gravity center -crop 1920x1200+0+0 +repage "$line"-para-1920x1200.jpg"
+	done < "$input"
+	error $?
 
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
 	echo "16/9 resolution"
-	convert "$file" -resize 1600x900^ -gravity center -crop 1600x900+0+0 +repage "$name"-1600x900.jpg		# 16/9
-	convert "$file" -resize 1920x1080^ -gravity center -crop 1920x1080+0+0 +repage "$name"-1920x1080.jpg		# 1080p
-	convert "$file" -resize 3840x2160^ -gravity center -crop 3840x2160+0+0 +repage "$name"-3840x2160.jpg		# 4k
-	#convert "$file" -resize 7680x4320^ -gravity center -crop 7680x4320+0+0 +repage "$name"-7680x4320.jpg		# 8k
-	#convert "$file" -resize 15360×8640^ -gravity center -crop 15360×8640+0+0 +repage "$name"-15360×8640.jpg	# 16k
-		error $?
-		
+input="/dev/shm/findfiles.txt"
+	while IFS= read -r "line"
+	do
+	echo "$line"
+	parallel -j $entry ::: "convert "$line" -resize 1280x720^ -gravity center -crop 1280x720+0+0 +repage "$line"-para-1280x720.jpg" "convert "$line" -resize 1600x900^ -gravity center -crop 1600x900+0+0 +repage "$line"-para-1600x900.jpg" "convert "$line" -resize 1920x1080^ -gravity center -crop 1920x1080+0+0 +repage "$line"-para-1920x1080.jpg" "convert "$line" -resize 7680x4320^ -gravity center -crop 7680x4320+0+0 +repage "$line"-para-7680x4320.jpg"
+	done < "$input"
+	error $?
+	
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Special resolution, dual screen (2 x 1920x1080)"
-	#convert "$file" -resize 3840x1080^ -gravity center -crop 3840x1080+0+0 +repage "$name"-3840x1080.jpg
-	echo "Special resolution, dual screen (2 x 3840x2160)"
-	#convert "$file" -resize 7680x2160^ -gravity center -crop 7680x1080+0+0 +repage "$name"-7680x1080.jpg
-		error $?
-
-	fi
+	echo Dual screen
+input="/dev/shm/findfiles.txt"
+	while IFS= read -r "line"
+	do
+	echo "$line"
+	convert "$line" -resize 3840x1080^ -gravity center -crop 3840x1080+0+0 +repage "$line"-para-3840x1080.jpg
+	done < "$input"
+	error $?
 
 echo -------------------------========================-------------------------
 ## Software lead-out.
@@ -177,14 +256,16 @@ echo -------------------------========================-------------------------
 	echo "Current time : $now"
 echo -------------------------========================-------------------------
 ## Press enter or auto-quit here.
-	echo "If a script takes MORE than 120 seconds to complete it will ask you to"
-	echo "press ENTER to terminate."
+	echo "${yellow}If a script takes MORE than 120 seconds to complete it will ask you to take action !${reset}"
+	echo "Press ENTER to terminate."
 	echo
-	echo "If a script takes LESS than 120 seconds to complete it will auto"
-	echo "terminate after 10 seconds"
+	echo "${green}If a script takes LESS than 120 seconds to complete it will auto-terminate !${reset}"
+	echo "Auto-terminate after 10 seconds"
 	echo
 
+echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
+	debug $?
 if [ $(( SECONDS - start )) -gt 120 ]
 then
 	echo "Script takes more than 120 seconds to complete."
@@ -197,7 +278,9 @@ else
 	echo "Auto-quit in 10 sec. (You can press X)"
 	echo
 	echo "${green}████████████████████████████████ Finish ██████████████████████████████████${reset}"
+	if [[ "debug" == 0 ]]; then
 	sleep 10
+	else
 fi
 	exit
 ## -----===== End of bash =====-----

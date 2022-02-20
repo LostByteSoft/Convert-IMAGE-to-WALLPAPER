@@ -22,10 +22,18 @@ echo -------------------------========================-------------------------
 	echo 2022-02-20_Sunday_12:22:54
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Convert to JPG"
-	echo "File name : Convert to JPG.sh"
+	echo "Software name: Convert ALL to PNG (or any image format you want)"
+	echo "File name : file Convert ALL to PNG.sh"
 	echo
-	echo "What it does ? Convert 1 image or all folder to JPG format."
+	echo "What it does ? Take all image in a specified folder ans convert it to"
+	echo "PNG image format."
+	echo
+	echo "Read me for this file (and known bugs) :"
+	echo
+	echo "You can edit this file to convert to ANY image format (supported by imgick."
+	echo
+	echo "Known bug or limitations, could not remove the original file extension."
+	echo
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
 	echo "By LostByteSoft, no copyright or copyleft."
@@ -69,8 +77,8 @@ echo Function Error detector. If errorlevel is 1 or greater will show error msg.
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -108,12 +116,42 @@ echo "Get the last Folder :"
 	INPUT="$(dirname "${VAR}")"
 	echo ${INPUT##*/} 
 ## The code program.
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "convert $file -quality 90 "$name"_1.jpg"
-	convert $file -format jpg -quality 95 "$name"_1.jpg
+	rm "/dev/shm/findfiles.txt"
+
+echo Finding files...
+
+	## Easy way to add a file format, copy paste a new line.
+	echo "Will find files in sub folders too...."
+	#find $file -name '*.png'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.jpg'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.bmp'  >> "/dev/shm/findfiles.txt"
+	#find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
+	cat "/dev/shm/findfiles.txt"
+	echo	
+echo Finding finish, with file count :
+	wc -l < "/dev/shm/findfiles.txt"
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+
+	echo Conversion started... Simple convert 1 file at a time.
+	{
+	input="/dev/shm/findfiles.txt"
+		while IFS= read -r "line"
+		do
+		echo Output : "$line"_convert.png
+		#convert "$line" -format jpg -quality 95 "$line"_convert.jpg
+		convert "$line" -format png "$line"_convert.png
+		done < "$input"
+	}
 	error $?
 
+echo Conversion finish...
+	
 echo -------------------------========================-------------------------
 ## Software lead-out.
 	echo "Finish... with numbers of actions : $part"
@@ -122,16 +160,19 @@ echo -------------------------========================-------------------------
 	echo "Time needed: $date"
 	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
 	echo "Current time : $now"
+
 echo -------------------------========================-------------------------
 ## Press enter or auto-quit here.
-	echo "If a script takes MORE than 120 seconds to complete it will ask you to"
-	echo "press ENTER to terminate."
+	echo "${yellow}If a script takes MORE than 120 seconds to complete it will ask you to take action !${reset}"
+	echo "Press ENTER to terminate."
 	echo
-	echo "If a script takes LESS than 120 seconds to complete it will auto"
-	echo "terminate after 10 seconds"
+	echo "${green}If a script takes LESS than 120 seconds to complete it will auto-terminate !${reset}"
+	echo "Auto-terminate after 10 seconds"
 	echo
 
+echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
+	debug $?
 if [ $(( SECONDS - start )) -gt 120 ]
 then
 	echo "Script takes more than 120 seconds to complete."
@@ -147,6 +188,7 @@ else
 	sleep 10
 fi
 	exit
+
 ## -----===== End of bash =====-----
 
 End-user license agreement (eula)

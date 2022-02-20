@@ -43,14 +43,12 @@ Converters files:
 ---------------------------------------------
 
 	Convert IMAGE to WALLPAPER_v1.sh
-		-You select one file and convert.
-	
+		-You select one file and convert to common screen resolutions.
 	THE BEST TO USE
 	Convert IMAGE to WALLPAPER_v2.sh
-		-The version to use
-		-You select one file and convert to multiples resolutions or only your screen resolution.
-		-Convert to any resolution to fill all the black bars.
-
+		-You select one file and convert to multiples resolutions.
+		-Convert only to your screen resolution.
+		-Convert to any resolution to fill (or remove) all the black bars.
 	Convert IMAGE to WALLPAPER_v3 (parallel).sh
 		-Convert the selected folder AND sub folder.
 		-Use parallel to faster convert.
@@ -59,9 +57,14 @@ Converters files:
 		Convert ONE image file to 1000 x 1000 px, poster.jpg
 		Convert ONE image file to 750 x 750 px, nameofthefolder.jpg
 		Convert ONE image file to 500 x 500 px, cover.jpg
+	Convert ALL to PNG.sh
+		Convert images files in folder to PNG format.
+	Convert ALL to WEBP.sh
+		Convert images files in folder to WEBP format.
 	Convert to JPG.sh
-		Convert whatever to JPG format.
-
+		Convert one images file to JPG format.
+	Convert to WEBP.sh
+		Convert one images file to WEBP format.
 
 Others files:
 ---------------------------------------------

@@ -19,13 +19,13 @@ echo -------------------------========================-------------------------
 
 echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2022-02-16_Wednesday_03:36:23
+	echo 2022-02-20_Sunday_12:22:54
 	echo
 ## Software name, what is this, version, informations.
 	echo "Software name: Convert to JPG"
 	echo "File name : Convert to JPG.sh"
 	echo
-	echo "What it does ? Convert 1 image or all folder to JPG format."
+	echo "What it does ? Convert 1 image to WEBP format."
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
 	echo "By LostByteSoft, no copyright or copyleft."
@@ -33,51 +33,38 @@ echo -------------------------========================-------------------------
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
-echo Function Debug.
+echo Function Debug. Activate via source program debug=1.
 	debug()
-	{
 	if [ "$debug" -ge 1 ]; then
 		echo
-		echo "${yellow}DEBUG █████████████████████████████ DEBUG █████████████████████████████ DEBUG ${reset}"
+		echo "${yellow}██████████████████████████████ DEBUG SLEEP ███████████████████████████████${reset}"
 		echo
-		read -n 1 -s -r -p "Press any key to continue"
-		echo
+		echo debug = $debug
+		echo part = $part
+		echo INPUT = $INPUT
+		echo {INPUT##*/}  = ${INPUT##*/} 
+		echo input = $input
+		echo cpu = $(nproc)
+		echo def = $def
+		echo entry = $entry
+		echo 
+		read -n 1 -s -r -p "Press any key to EXIT"
+		exit
 	fi
-	}
 
-echo -------------------------========================-------------------------
 echo Function Error detector. If errorlevel is 1 or greater will show error msg.
 	error()
 	{
 	if [ "$?" -ge 1 ]; then
 		echo
-		echo "${red}ERROR █████████████████████████████ ERROR █████████████████████████████ ERROR ${reset}"
+		echo "${red}█████████████████████████████████ ERROR █████████████████████████████████${reset}"
 		echo
 		echo "!!! ERROR was detected !!! Press ANY key to try to CONTINUE !!! Will probably exit !!!"
 		echo
-		echo "This script take $(( SECONDS - start )) seconds to complete."
-		date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
-		echo "Time needed: $date"
-		echo
-		read -n 1 -s -r -p "Press any key to continue"
+		read -n 1 -s -r -p "Press any key to CONTINUE"
 		echo
 	fi
 	}
-
-echo -------------------------========================-------------------------
-echo "Check installed requirements !"
-
-if command -v imagemagick >/dev/null 2>&1
-	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
-		echo -------------------------========================-------------------------
-		sleep 10
-		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
-fi
 
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
@@ -114,17 +101,19 @@ echo "Input name, directory and output name : (Debug helper)"
 	echo "Output name bis : "$name1""
 	
 echo -------------------------========================-------------------------
-## Variables, for program."
 	part=0
-	debug=0
-
+	debug=0		# Change to 1 to activate debug msg.
+	error=0		# Change to 1 to test error msg.
+echo "Get the last Folder :"
+	INPUT="$(dirname "${VAR}")"
+	echo ${INPUT##*/} 
 ## The code program.
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
 	echo convert $file -format webp "$name".webp
-	convert $file -format webp "$name".webp
+	#convert $file -format webp  "$name".webp
+	convert "$file" -format webp -define webp:near-lossless=95 "$name"_convert.webp
 	error $?
-	debug $?
 
 echo -------------------------========================-------------------------
 ## Software lead-out.
@@ -145,6 +134,7 @@ echo -------------------------========================-------------------------
 
 echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
+	debug $?
 if [ $(( SECONDS - start )) -gt 120 ]
 then
 	echo "Script takes more than 120 seconds to complete."
@@ -157,7 +147,6 @@ else
 	echo "Auto-quit in 10 sec. (You can press X)"
 	echo
 	echo "${green}████████████████████████████████ Finish ██████████████████████████████████${reset}"
-	debug $?
 	sleep 10
 fi
 	exit
