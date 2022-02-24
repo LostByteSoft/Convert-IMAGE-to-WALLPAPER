@@ -22,8 +22,8 @@ echo -------------------------========================-------------------------
 	echo 2022-02-20_Sunday_12:22:54
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Convert ALL images to WEBP"
-	echo "File name : Convert ALL to WEBP.sh"
+	echo "Software name: Convert ALL to JPG 1500px"
+	echo "File name : Convert ALL to JPG (1500x1500).sh"
 	echo
 	echo "What it does ?  Convert ALL to WEBP image format."
 	echo "Use folder select"
@@ -126,7 +126,7 @@ echo Finding files...
 	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
 	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
 	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
-	#find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
 	cat "/dev/shm/findfiles.txt"
 	echo	
 echo Finding finish, with file count :
@@ -143,7 +143,7 @@ echo "-------------------------===== Section $part =====------------------------
 		while IFS= read -r "line"
 		do
 		echo "$line"_convert.webp
-		convert "$line" -format webp -define webp:lossless=true "$line"_convert.webp
+		convert "$line" -format jpg -resize 1500x1500 "$line"_convert.jpg
 		done < "$input"
 	}
 	error $?
