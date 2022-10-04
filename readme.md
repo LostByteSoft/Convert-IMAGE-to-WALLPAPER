@@ -79,6 +79,22 @@ Convert ONE files:
 	Convert to WEBP.sh
 		Convert one images file to WEBP format.
 		
+Image Upscaler files:
+---------------------------------------------
+
+	Upscale ONE FILE image xbrzscale.sh
+		Upscale one file you specify.
+	
+	Upscale ALL FOLDER image xbrzscale.sh
+		Upscale all files in folder you specified.
+	
+	Upscale ALL PARALLEL image xbrzscale.sh
+		Same as 'all folder' but with gnu parallel.
+		Faster
+		
+![Screenshot](v5.jpg)
+![Screenshot](sca_ori.jpg)
+![Screenshot](sca_up.jpg)
 
 Others files:
 ---------------------------------------------

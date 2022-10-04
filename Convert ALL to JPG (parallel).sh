@@ -5,7 +5,7 @@
 	#printf '\033[8;40;80t'		# will resize the window, if needed.
 	printf '\033[8;40;100t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
-	sleep 1
+	sleep 0.5
 	
 echo -------------------------========================-------------------------
 ## Software lead-in
@@ -18,7 +18,7 @@ echo -------------------------========================-------------------------
 	blue=`tput setaf 12`
 	reset=`tput sgr0`
 ## COmmon variables, you can changes theses variables as you wish to test (0 or 1)
-	autoquit=1	# autoquit anyway to script takes more than 2 min to complete
+	autoquit=0	# autoquit anyway to script takes more than 2 min to complete
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
@@ -127,7 +127,7 @@ echo "Numbers of parallel multi-cores to use ?"
 	defv=1
 	#echo defv = $defv
 	fi
-	#entry=$(zenity --scale --value="$defi" --min-value="1" --max-value="32" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have "$cpu" total cores !\n\n\tDefault suggested value is "$defv" for video.\n\n\tDefault suggested value is "$defa" for audio.\n\n\tDefault suggested value is "$defi" for images.\n\n(1 to whatever core you want to use will work anyway !)")
+	entry=$(zenity --scale --value="$defi" --min-value="1" --max-value="32" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have "$cpu" total cores !\n\n\tDefault suggested value is "$defv" for video.\n\n\tDefault suggested value is "$defa" for audio.\n\n\tDefault suggested value is "$defi" for images.\n\n(1 to whatever core you want to use will work anyway !)")
 
 if test -z "$entry"
 	then
@@ -144,8 +144,8 @@ echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
 	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
-	file="/home/"$USER"/Downloads"
+	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="/home/"$USER"/Downloads"
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -230,9 +230,9 @@ echo "-------------------------===== Section $part =====------------------------
 	count=`ls -1 "$file"/*.tiff 2>/dev/null | wc -l`
 	echo TIFF count is : $count
 	count=`ls -1 "$file"/*.jpg 2>/dev/null | wc -l`
-	echo JPG count is : $count
+	echo "JPG count is : $count (NOT converted)"
 	count=`ls -1 "$file"/*.webp 2>/dev/null | wc -l`
-	echo "WEBP count is : $count (NOT converted)"
+	echo "WEBP count is : $count"
 	count=`ls -1 "$file"/*.gif 2>/dev/null | wc -l`
 	echo GIF count is : $count
 	count=`ls -1 "$file"/*.png 2>/dev/null | wc -l`
@@ -251,7 +251,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPEG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.jpeg
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.jpeg
 	fi
 	error $?
 	part=$((part+1))
@@ -260,7 +260,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo BMP conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.bmp
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.bmp
 	fi
 	error $?
 	part=$((part+1))
@@ -269,7 +269,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.tif
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.tif
 	fi
 	error $?
 	part=$((part+1))
@@ -278,7 +278,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIFF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.tiff
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.tiff
 	fi
 	error $?
 	part=$((part+1))
@@ -287,7 +287,8 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.jpg
+	echo NO jpg reconvert
+	#parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.jpg
 	fi
 	error $?
 	part=$((part+1))
@@ -296,9 +297,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo WEBP conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	echo "No webp conversion."
-	#parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.webp
-	echo NO webp conversion.
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.webp
 	fi
 	error $?
 	part=$((part+1))
@@ -307,7 +306,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo GIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.gif
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.gif
 	fi
 	error $?
 	part=$((part+1))
@@ -316,7 +315,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo PNG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.png
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.png
 	fi
 	error $?
 	part=$((part+1))
@@ -325,7 +324,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo AVIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.avif
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.avif
 	fi
 	error $?
 	part=$((part+1))

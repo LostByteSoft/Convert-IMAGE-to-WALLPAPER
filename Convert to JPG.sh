@@ -111,7 +111,7 @@ echo "Get the last Folder :"
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
 	echo "convert "$file" -quality 90 "$name"_1.jpg"
-	convert "$file" -format jpg -quality 95 "$name"_1.jpg
+	convert "$file" -format jpg -quality 80 "$name"_1.jpg
 	error $?
 
 echo -------------------------========================-------------------------
