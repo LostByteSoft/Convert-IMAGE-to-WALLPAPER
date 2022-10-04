@@ -91,9 +91,12 @@ Image Upscaler files:
 	Upscale ALL PARALLEL image xbrzscale.sh
 		Same as 'all folder' but with gnu parallel.
 		Faster
-		
+
+Screen of Upscale ONE FILE image xbrzscale.sh
 ![Screenshot](v5.jpg)
+Original image file.
 ![Screenshot](sca_ori.jpg)
+Upscaled image file.
 ![Screenshot](sca_up.jpg)
 
 Others files:
