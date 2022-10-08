@@ -18,14 +18,16 @@ echo -------------------------========================-------------------------
 	reset=`tput sgr0`
 
 ## Common variables, you can changes theses variables as you wish to test (0 or 1)
-	autoquit=1	# autoquit anyway to script takes more than 2 min to complete
+	autoquit=0	# autoquit anyway to script takes more than 2 min to complete
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
+	
+	echo autoquit=$autoquit debug=$debug error=$error
 
 echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2022-10-04_Tuesday_12:35:44
+	echo 2022-10-06_Thursday_04:33:12
 	echo
 ## Software name, what is this, version, informations.
 	echo "Software name: Upscale image(s)"
@@ -45,7 +47,7 @@ echo Function Debug. Activate via source program debug=1.
 debug()
 	if [ "$debug" -ge 1 ]; then
 		echo
-		echo "${yellow}██████████████████████████████ DEBUG SLEEP ███████████████████████████████${reset}"
+		echo "${yellow}█████████████████████████████████ DEBUG ██████████████████████████████████${reset}"
 		echo
 		echo debug = $debug 	part = $part 	file = $file
 		echo cpu = $cpu 	defv = $defv 	defa = $defa
@@ -113,25 +115,62 @@ echo "Input name, directory and output name : (Debug helper)"
 	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
 	echo "Output name bis : "$name1""
 	
-	debug $?
-	
 echo -------------------------========================-------------------------
 ## The code program.
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+
+echo "Numbers of xbrzscale scale_factor"
+	entry=$(zenity --scale --value="6" --min-value="2" --max-value="6" --title "Numbers of xbrzscale scale_factor" --text "Numbers of xbrzscale scale_factor, 2 (lower) to 6 (bigger)")
+
+if test -z "$entry"
+	then
+		echo "Default value of $cpu will be used. Now continue in 3 seconds."
+		entry=$(nproc)
+		echo "You have selected : $entry"
+		#sleep 3
+	else
+		echo "You have selected : $entry"
+fi
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
 
 	echo Example:
 	echo xbrzscale
 	echo usage: xbrzscale scale_factor input_image output_image
 	echo scale_factor can be between 2 and 6
 	
-	echo xbrzscale 6 "$file" "$name"_UpScale.jpg
+	echo xbrzscale $entry "$file" "$name"_UpScale.jpg
+	xbrzscale $entry "$file" "$name"_UpScale.jpg
 	
-	xbrzscale 6 "$file" "$name"_UpScale.jpg
 	error $?
 
 echo -------------------------========================-------------------------
+## Software lead-out.
+	echo "Finish... with numbers of actions : $part"
+	echo "This script take $(( SECONDS - start )) seconds to complete."
+	date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
+	echo "Time needed: $date"
+	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
+	echo "Current time : $now"
+
+echo -------------------------========================-------------------------
+## Press enter or auto-quit here.
+	echo "If a script takes MORE than 120 seconds to complete it will ask you to"
+	echo "press ENTER to terminate."
+	echo
+	echo "If a script takes LESS than 120 seconds to complete it will auto"
+	echo "terminate after 10 seconds"
+	echo
+
+echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
+	echo
+	echo Processing file of "$name1" finish !
+	echo
+
 if [ "$autoquit" -eq "1" ]
 then
 		echo "Script will auto quit in 1 seconds."
@@ -147,12 +186,16 @@ then
 			echo "Press ENTER key to exit !"
 			echo
 			echo "${yellow}████████████████████████████████ Finish ██████████████████████████████████${reset}"
+			echo
+			echo -------------------------========================-------------------------
 			read name
 		else
 			echo "Script takes less than 120 seconds to complete."
 			echo "Auto-quit in 10 sec. (You can press X)"
 			echo
 			echo "${green}████████████████████████████████ Finish ██████████████████████████████████${reset}"
+			echo
+			echo -------------------------========================-------------------------
 			sleep 10
 		fi
 	}
@@ -162,9 +205,9 @@ then
 
 ## -----===== End of bash =====-----
 
-End-user license agreement (eula)
+	End-user license agreement (eula)
 
- 	JUST DO WHAT YOU WANT WITH THE PUBLIC LICENSE
+ 	JUST DO WHAT THE F*** YOU WANT WITH THE PUBLIC LICENSE
  	
  	Version 3.1415926532 (January 2022)
  	
@@ -180,6 +223,8 @@ End-user license agreement (eula)
  	warranty, electrocution, drowning, divorce, civil war, the effects of radiation
  	due to atomic fission, unexpected tax recalls or encounters with
  	extraterrestrial beings elsewhere.
+ 	
+ 	YOU MUST ACCEPT THESES TERMS OR NOTHING WILL HAPPEN.
  	
  	LostByteSoft no copyright or copyleft we are in the center.
 
