@@ -18,7 +18,7 @@ echo -------------------------========================-------------------------
 	reset=`tput sgr0`
 
 ## Common variables, you can changes theses variables as you wish to test (0 or 1)
-	autoquit=0	# autoquit anyway to script takes more than 2 min to complete
+	autoquit=1	# autoquit anyway to script takes more than 2 min to complete
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
@@ -27,7 +27,7 @@ echo -------------------------========================-------------------------
 
 echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2022-10-06_Thursday_04:33:12
+	echo 2022-10-20_Thursday_06:37:51
 	echo
 ## Software name, what is this, version, informations.
 	echo "Software name: Upscale image(s)"
@@ -43,6 +43,21 @@ echo -------------------------========================-------------------------
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
+echo "Check installed requirement !"
+
+if command -v ffmpeg >/dev/null 2>&1
+	then
+		echo "xbrzscale installed continue."
+		dpkg -s xbrzscale | grep Version
+	else
+		echo "You don't have ' xbrzscale ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install xbrzscale"
+		echo -------------------------========================-------------------------
+		sleep 10
+		exit
+fi
+
+echo -------------------------========================-------------------------
 echo Function Debug. Activate via source program debug=1.
 debug()
 	if [ "$debug" -ge 1 ]; then
@@ -55,6 +70,12 @@ debug()
 		echo 
 		read -n 1 -s -r -p "Press any key to continue"
 		#exit
+	fi
+	
+		if [ "$debug" -eq "1" ]; then
+		echo
+		echo "${yellow}██████████████████████████████ DEBUG ACTIVATED ███████████████████████████${reset}"
+		echo
 	fi
 
 echo Function Error detector. If errorlevel is 1 or greater will show error msg.
@@ -158,8 +179,8 @@ echo -------------------------========================-------------------------
 
 echo -------------------------========================-------------------------
 ## Press enter or auto-quit here.
-	echo "If a script takes MORE than 120 seconds to complete it will ask you to"
-	echo "press ENTER to terminate."
+	echo "If a script takes MORE than 120 seconds to complete it will ask"
+	echo "you to press ENTER to terminate."
 	echo
 	echo "If a script takes LESS than 120 seconds to complete it will auto"
 	echo "terminate after 10 seconds"
@@ -170,6 +191,7 @@ echo -------------------------========================-------------------------
 	echo
 	echo Processing file of "$name1" finish !
 	echo
+	debug $?
 
 if [ "$autoquit" -eq "1" ]
 then
@@ -183,19 +205,18 @@ then
 	if [ $(( SECONDS - start )) -gt 120 ]
 		then
 			echo "Script takes more than 120 seconds to complete."
-			echo "Press ENTER key to exit !"
 			echo
 			echo "${yellow}████████████████████████████████ Finish ██████████████████████████████████${reset}"
 			echo
 			echo -------------------------========================-------------------------
-			read name
+			read -n 1 -s -r -p "Press ENTER key to exit !"
 		else
 			echo "Script takes less than 120 seconds to complete."
-			echo "Auto-quit in 10 sec. (You can press X)"
 			echo
 			echo "${green}████████████████████████████████ Finish ██████████████████████████████████${reset}"
 			echo
 			echo -------------------------========================-------------------------
+			echo "Auto-quit in 10 sec. (You can press X)"
 			sleep 10
 		fi
 	}

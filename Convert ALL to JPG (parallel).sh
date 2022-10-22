@@ -287,8 +287,9 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	echo NO jpg reconvert
-	#parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.jpg
+	#echo NO jpg reconvert
+	echo parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.jpg
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.jpg
 	fi
 	error $?
 	part=$((part+1))
