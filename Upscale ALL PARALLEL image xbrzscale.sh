@@ -2,7 +2,8 @@
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
 	#printf '\033[8;40;80t'		# will resize the window, if needed.
-	printf '\033[8;40;125t'		# will resize the window, if needed.
+	#printf '\033[8;40;125t'	# will resize the window, if needed.
+	printf '\033[8;40;150t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
 	sleep 0.50
 	
@@ -18,16 +19,16 @@ echo -------------------------========================-------------------------
 	reset=`tput sgr0`
 
 ## Common variables, you can changes theses variables as you wish to test (0 or 1)
-	autoquit=1	# autoquit anyway to script takes more than 2 min to complete
+	autoquit=0	# autoquit anyway to script takes more than 2 min to complete
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
 	
-	echo autoquit=$autoquit debug=$debug error=$error
+	echo autoquit=$autoquit debug=$debug error=$error part=$part
 
 echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2022-10-20_Thursday_06:37:51
+	echo 2022-10-26_Wednesday_12:28:13
 	echo
 ## Software name, what is this, version, informations.
 	echo "Software name: Upscale image(s)"
@@ -42,10 +43,11 @@ echo -------------------------========================-------------------------
 	echo "https://github.com/LostByteSoft"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
+
 echo -------------------------========================-------------------------
 echo "Check installed requirement !"
 
-if command -v ffmpeg >/dev/null 2>&1
+if command -v xbrzscale >/dev/null 2>&1
 	then
 		echo "xbrzscale installed continue."
 		dpkg -s xbrzscale | grep Version
@@ -57,7 +59,18 @@ if command -v ffmpeg >/dev/null 2>&1
 		exit
 fi
 
-echo -------------------------========================-------------------------
+if command -v imagemagick >/dev/null 2>&1
+	then
+		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install imagemagick"
+		echo -------------------------========================-------------------------
+		sleep 10
+		exit
+	else
+		echo "imagemagick installed continue."
+		dpkg -s imagemagick | grep Version
+fi
+
 if command -v parallel >/dev/null 2>&1
 	then
 		echo "Parallel installed continue."
@@ -70,16 +83,24 @@ if command -v parallel >/dev/null 2>&1
 		exit
 fi
 
-echo -------------------------========================-------------------------
 echo Function Debug. Activate via source program debug=1.
 debug()
 	if [ "$debug" -ge 1 ]; then
 		echo
 		echo "${yellow}█████████████████████████████████ DEBUG ██████████████████████████████████${reset}"
 		echo
-		echo debug = $debug 	part = $part 	file = $file
-		echo cpu = $cpu 	defv = $defv 	defa = $defa
-		echo defi = $defi 	entry = $entry 	autoquit = $autoquit
+		echo debug = $debug 	part = $part 	autoquit = $autoquit file = $file
+		echo
+		echo entry = $entry	entry2 = $entry2 	
+		echo
+		echo file = $file
+		echo
+		echo cpu = $cpu
+		echo defv = $defv
+		echo defs = $defx
+		echo defa = $defa
+		echo defi = $defi
+		echo defz = $defz
 		echo 
 		read -n 1 -s -r -p "Press any key to continue"
 		#exit
@@ -89,6 +110,8 @@ debug()
 		echo
 		echo "${yellow}██████████████████████████████ DEBUG ACTIVATED ███████████████████████████${reset}"
 		echo
+		echo Continue in 3 seconds...
+		sleep 3
 	fi
 
 echo Function Error detector. If errorlevel is 1 or greater will show error msg.
@@ -132,19 +155,17 @@ echo -------------------------========================-------------------------
 echo "Numbers of parallel multi-cores to use ?"
 	cpu=$(nproc)
 	defv=$(( cpu / 4 ))	## for video files
+	defx=$(( cpu / 2 ))	## for audio files
 	defa=$(nproc)		## for audio files
 	defi=$(( cpu * 2 ))	## for images files
-	#echo cpu = $cpu
-	#echo defv = $defv
-	#echo defs = $defs
-	#echo defa = $defa
-	#echo defi = $defi
-	entry=$(zenity --scale --value="$defa" --min-value="1" --max-value="32" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have "$cpu" total cores !\n\n\tDefault suggested value is "$defv" for video.\n\n\tDefault suggested value is "$defa" for audio.\n\n\tDefault suggested value is "$defi" for images.\n\n(1 to whatever core you want to use will work anyway !)")
+	defz=$(( cpu * 4 ))	## for images files
+
+	entry=$(zenity --scale --value="$defx" --min-value="1" --max-value="32" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have "$cpu" total cores !\n\n\tDefault suggested value is "$defv" for video.\n\n\tDefault suggested value is "$defa" for audio.\n\n\tDefault suggested value is ("$defx" xbrzscale) "$defz" for images.\n\n(1 to whatever core you want to use will work anyway !)")
 
 if test -z "$entry"
 	then
-		echo "Default value of $cpu will be used. Now continue in 3 seconds."
-		entry=$(nproc)
+		echo "Default value of "2" (Safe value) will be used. Now continue."
+		entry=2
 		echo "You have selected : $entry"
 		#sleep 3
 	else
@@ -178,16 +199,16 @@ echo -------------------------========================-------------------------
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 echo "Numbers of xbrzscale scale_factor"
-	entry2=$(zenity --scale --value="6" --min-value="2" --max-value="6" --title "Numbers of xbrzscale scale_factor" --text "Numbers of xbrzscale scale_factor, 2 (lower) to 6 (bigger)")
+	entry2=$(zenity --scale --value="4" --min-value="2" --max-value="6" --title "Numbers of xbrzscale scale_factor" --text "Numbers of xbrzscale scale_factor, 2 (lower) to 6 (bigger).\n\n\tSuggested default to 4.")
 
 if test -z "$entry"
 	then
-		echo "Default value of $cpu will be used. Now continue in 3 seconds."
-		entry=$(nproc)
-		echo "You have selected : $entry"
+		echo "Default value of 3 will be used."
+		entry2=3
+		echo "You have selected : $entry2"
 		#sleep 3
 	else
-		echo "You have selected : $entry"
+		echo "You have selected : $entry2"
 fi
 
 part=$((part+1))
@@ -201,21 +222,23 @@ echo "-------------------------===== Section $part =====------------------------
 	echo Finding files...
 
 	## Easy way to add a file format, copy paste a new line.
-	echo "Will find files in sub folders too...."
-	find $file -name '*.png'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.bmp'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
+	echo "Will NOT find files in sub folders... Remove -maxdepth 1 to search subfolders."
+	find $file -maxdepth 1 -iname '*.png'  >> "/dev/shm/findfiles.txt"
+	find $file -maxdepth 1 -iname '*.jpg'  >> "/dev/shm/findfiles.txt"
+	find $file -maxdepth 1 -iname '*.jpeg'  >> "/dev/shm/findfiles.txt"
+	find $file -maxdepth 1 -iname '*.bmp'  >> "/dev/shm/findfiles.txt"
+	find $file -maxdepth 1 -iname '*.gif'  >> "/dev/shm/findfiles.txt"	#UpScale of animated gif is not supported.
+	find $file -maxdepth 1 -iname '*.tif'  >> "/dev/shm/findfiles.txt"
+	find $file -maxdepth 1 -iname '*.tiff'  >> "/dev/shm/findfiles.txt"
+	find $file -maxdepth 1 -iname '*.webp'  >> "/dev/shm/findfiles.txt"
+	find $file -maxdepth 1 -iname '*.avif'  >> "/dev/shm/findfiles.txt"
 	
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 	echo List files...
 	cat "/dev/shm/findfiles.txt"
+	#echo "Continue in 3 seconds..."
+	#sleep 3
 	
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
@@ -226,9 +249,69 @@ part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 
 	echo Conversion started...
+
 	echo Complex convertion multiples files "($entry)" at a time.
-	echo parallel -j $entry xbrzscale $entry2 {} {.}_UpScale.jpg ::: "$file"/*.*
-	parallel -j $entry xbrzscale $entry2 {} {.}_UpScale.jpg ::: "$file"/*.*
+
+	#echo parallel -j $entry xbrzscale $entry2 {} {}_UpScale.webp ::: "$file"/*.*
+	#parallel -j $entry xbrzscale $entry2 {} {}_UpScale.webp ::: "$file"/*.*
+	parallel -a "/dev/shm/findfiles.txt" -j $entry xbrzscale $entry2 {} {}_UpScale.webp
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+
+	echo "Reconvert (Yes or No (Suggest Yes))"
+	if zenity --question --text="Do you want to reconvert to save space ? (Yes or No (Suggest Yes))"
+	then
+	
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+			## convert to webp, simple conversion
+			#{
+			#input="/dev/shm/findfiles.txt"
+			#while IFS= read -r "line"
+			#do
+			#	conv=$((conv+1))
+			#	echo Conversion number $conv
+			#	echo "$line"
+			#	echo convert "$line"_UpScale.webp -format webp -define webp:near-lossless=85 "$line"_UpScale.webp""
+			#	convert "$line"_UpScale.webp -format webp -define webp:near-lossless=85 "$line"_UpScale.webp""
+			#done < "$input"
+			#}
+		
+			## convert to webp, parallel conversion
+			rm "/dev/shm/findfiles.txt"
+			find $file -maxdepth 1 -iname '*UpScale.webp'  >> "/dev/shm/findfiles.txt"
+		
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"	
+			echo List files...
+			cat "/dev/shm/findfiles.txt"
+		
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+			echo File count :
+			wc -l < "/dev/shm/findfiles.txt"
+			echo Parallel jobs for images converting : $defi
+		
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+			#echo paralle show
+			#parallel -a "/dev/shm/findfiles.txt" echo
+
+			# $defi is defined by the processor * 2
+			#parallel -a "/dev/shm/findfiles.txt" -j $defz mogrify -verbose -depth 32 -define webp:near-lossless=90 -format webp
+			parallel -a "/dev/shm/findfiles.txt" -j $defi mogrify -verbose -depth 32 -format webp
+			error $?
+
+	else
+
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+			echo "Not reconverted."
+
+	fi
+	error $?
+
 	echo Conversion finish...
 
 echo -------------------------========================-------------------------
@@ -252,7 +335,7 @@ echo -------------------------========================-------------------------
 echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
 	echo
-	echo Processing file of "$name1" finish !
+	echo Processing file or folder of "$name1" finish !
 	echo
 	debug $?
 

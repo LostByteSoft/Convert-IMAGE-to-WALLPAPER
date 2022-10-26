@@ -2,7 +2,8 @@
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
 	#printf '\033[8;40;80t'		# will resize the window, if needed.
-	printf '\033[8;40;125t'		# will resize the window, if needed.
+	#printf '\033[8;40;125t'	# will resize the window, if needed.
+	printf '\033[8;40;150t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
 	sleep 0.50
 	
@@ -18,16 +19,16 @@ echo -------------------------========================-------------------------
 	reset=`tput sgr0`
 
 ## Common variables, you can changes theses variables as you wish to test (0 or 1)
-	autoquit=1	# autoquit anyway to script takes more than 2 min to complete
+	autoquit=0	# autoquit anyway to script takes more than 2 min to complete
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
 	
-	echo autoquit=$autoquit debug=$debug error=$error
+	echo autoquit=$autoquit debug=$debug error=$error part=$part
 
 echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2022-10-20_Thursday_06:37:51
+	echo 2022-10-26_Wednesday_12:28:16
 	echo
 ## Software name, what is this, version, informations.
 	echo "Software name: Upscale image(s)"
@@ -42,10 +43,11 @@ echo -------------------------========================-------------------------
 	echo "https://github.com/LostByteSoft"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
+
 echo -------------------------========================-------------------------
 echo "Check installed requirement !"
 
-if command -v ffmpeg >/dev/null 2>&1
+if command -v xbrzscale >/dev/null 2>&1
 	then
 		echo "xbrzscale installed continue."
 		dpkg -s xbrzscale | grep Version
@@ -57,16 +59,36 @@ if command -v ffmpeg >/dev/null 2>&1
 		exit
 fi
 
-echo -------------------------========================-------------------------
+if command -v imagemagick >/dev/null 2>&1
+	then
+		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install imagemagick"
+		echo -------------------------========================-------------------------
+		sleep 10
+		exit
+	else
+		echo "imagemagick installed continue."
+		dpkg -s imagemagick | grep Version
+fi
+
 echo Function Debug. Activate via source program debug=1.
 debug()
 	if [ "$debug" -ge 1 ]; then
 		echo
 		echo "${yellow}█████████████████████████████████ DEBUG ██████████████████████████████████${reset}"
 		echo
-		echo debug = $debug 	part = $part 	file = $file
-		echo cpu = $cpu 	defv = $defv 	defa = $defa
-		echo defi = $defi 	entry = $entry 	autoquit = $autoquit
+		echo debug = $debug 	part = $part 	autoquit = $autoquit file = $file
+		echo
+		echo entry = $entry	entry2 = $entry2 	
+		echo
+		echo file = $file
+		echo
+		echo cpu = $cpu
+		echo defv = $defv
+		echo defs = $defx
+		echo defa = $defa
+		echo defi = $defi
+		echo defz = $defz
 		echo 
 		read -n 1 -s -r -p "Press any key to continue"
 		#exit
@@ -76,6 +98,8 @@ debug()
 		echo
 		echo "${yellow}██████████████████████████████ DEBUG ACTIVATED ███████████████████████████${reset}"
 		echo
+		echo Continue in 3 seconds...
+		sleep 3
 	fi
 
 echo Function Error detector. If errorlevel is 1 or greater will show error msg.
@@ -142,12 +166,12 @@ echo -------------------------========================-------------------------
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 echo "Numbers of xbrzscale scale_factor"
-	entry=$(zenity --scale --value="6" --min-value="2" --max-value="6" --title "Numbers of xbrzscale scale_factor" --text "Numbers of xbrzscale scale_factor, 2 (lower) to 6 (bigger)")
+	entry=$(zenity --scale --value="4" --min-value="2" --max-value="6" --title "Numbers of xbrzscale scale_factor" --text "Numbers of xbrzscale scale_factor, 2 (lower) to 6 (bigger)")
 
 if test -z "$entry"
 	then
-		echo "Default value of $cpu will be used. Now continue in 3 seconds."
-		entry=$(nproc)
+		echo "Default value of $cpu will be used. Now continue."
+		entry=3
 		echo "You have selected : $entry"
 		#sleep 3
 	else
@@ -170,8 +194,7 @@ echo "-------------------------===== Section $part =====------------------------
 	find $file -name '*.jpg'  >> "/dev/shm/findfiles.txt"
 	find $file -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
 	find $file -name '*.bmp'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
+	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"	#no animated gif UpScale
 	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
 	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
 	find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
@@ -195,14 +218,44 @@ echo "-------------------------===== Section $part =====------------------------
 	input="/dev/shm/findfiles.txt"
 		while IFS= read -r "line"
 		do
+			conv=$((conv+1))
+			echo Conversion number $conv
 			echo "$line"
-			echo xbrzscale $entry "$line" "$line"_UpScale.jpg
-			xbrzscale $entry "$line" "$line"_UpScale.jpg
+			echo xbrzscale $entry "$line" "$line"_UpScale.webp
+			#xbrzscale $entry "$line" "$line"_UpScale.jpg		## jpg format
+			xbrzscale $entry "$line" "$line"_UpScale.webp		## webp format
 		done < "$input"
 	}
 	error $?
 
-echo Conversion finish...
+	echo "Reconvert (Yes or No (Suggest Yes))"
+	if zenity --question --text="Do you want to reconvert to save space ? (Yes or No (Suggest Yes))"
+	then
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		## convert to webp
+		then
+			{
+			input="/dev/shm/findfiles.txt"
+			while IFS= read -r "line"
+			do
+				conv=$((conv+1))
+				echo Conversion number $conv
+				echo "$line"
+				echo convert "$line"_UpScale.webp"" -format webp -define webp:near-lossless=80 "$line"_UpScale.webp""
+				convert "$line"_UpScale.webp"" -format webp "$line"_UpScale.webp""
+				done < "$input"
+			}
+		else
+
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		echo "Not reconverted."
+
+	fi
+	error $?
+
+	echo Conversion finish...
 
 echo -------------------------========================-------------------------
 ## Software lead-out.
@@ -225,7 +278,7 @@ echo -------------------------========================-------------------------
 echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
 	echo
-	echo Processing file of "$name1" finish !
+	echo Processing file or folder of "$name1" finish !
 	echo
 	debug $?
 
