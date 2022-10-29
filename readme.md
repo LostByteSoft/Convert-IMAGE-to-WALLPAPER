@@ -82,15 +82,26 @@ Convert ONE files:
 Image Upscaler files:
 ---------------------------------------------
 
-	Upscale ONE FILE image xbrzscale.sh
+Remember if there nothing to upscale, the results will be none.
+
+	Upscale_ONE_FILE_image_xbrzscale_V2210270622.sh
 		Upscale one file you specify.
+		To JPG
+		Select ONE file and upscale it.
+		Re-Compress image if you want.
 	
-	Upscale ALL FOLDER image xbrzscale.sh
+	Upscale_ALL_FOLDER_image_xbrzscale.sh_V_2210270622.sh
 		Upscale all files in folder you specified.
-	
-	Upscale ALL PARALLEL image xbrzscale.sh
+		To JPG
+		Select one FOLDER and upscale all image (one by one).
+		Re-Compress image if you want.
+
+	Upscale_ALL_PARALLEL_image_xbrzscale_V_2210270622.sh
 		Same as 'all folder' but with gnu parallel.
+		To JPG
 		Faster
+		Select one FOLDER and GNU parallel upscale it.
+		Re-Compress image if you want.
 
 Screen of Upscale ONE FILE image xbrzscale.sh
 ![Screenshot](v5.jpg)
@@ -98,6 +109,8 @@ Original image file.
 ![Screenshot](sca_ori.jpg)
 Upscaled image file.
 ![Screenshot](sca_up.jpg)
+Image of the script. (Upscale_ONE_FILE_image_xbrzscale.sh)
+![Screenshot](v6.jpg)
 
 Others files:
 ---------------------------------------------
