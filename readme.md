@@ -1,34 +1,28 @@
-LostByteSoft ; ConvertFFMPEG
+LostByteSoft ; Convert IMAGE to WALLPAPER
 
-Convert or modify multimedia files with FFMPEG.
+Convert images for wallpaper for different resolutions.
+
 
 Features:
 ---------------------------------------------
 
-Audio, video & images at different level.
+Convert IMAGE to WALLPAPER_v2 the V 2 is the version to use.
 
--Convert multimedia files, audio and video to standart format.
+	Tested on : ImageMagick 6.9.11-60 Q16 x86_64
+	
+	Need GNU parallel to work.
+	No more black bar.
+	
+	!!! Convert IMAGE to WALLPAPER_v2.sh is the best to use. !!!
+	
+	Create centered image, create RESOLUTION images files for wallpaper.
+	
+	Bash, imagemagick and parallel are used.
+	
+	NO MORE BLACK BARS in your wallpaper.
+	
+	Don't hack paid software, free software exists and does the job better.
 
--Use ffmpeg. (Installed by default in some Linux distros)
-	If not sudo apt-get install ffmpeg
-
--Use Zenity to find your files.
-
--Use command line, for conversions.
-
--It's just a bash script for easy use ffmpeg.
-
--Convert audio files (6 channels) to AC3 6 channels. (Wav, Aac, Dts, Flac)
-
--Convert AAC or another audio files.
-
--An easy way to convert audio (with video) AAC 6 channels to AC3 or DTS 6 channels.
-
--Convert video to x264 and x265.
-
-History: I start this "thing" just for convert aac 6 ch to ac3 6 ch and became what it is now.
-
--Update 2022-08-18 : dump just small updates.
 
 How to ?
 ---------------------------------------------
@@ -37,213 +31,121 @@ How to ?
 
 -Double click on it, select your file and press enter.
 
+-Files names are pretty revellant to what a files does.
+
 	
-Converters files:
+Convert image to wallpaper:
 ---------------------------------------------
 
--Single core ffmpeg (You can start many of theses sh files)
-
-	Convert ALLfolderAC3.sh
-		-All files in folder will be converted to AC3.
-	Convert ALLfolderMP3 128.sh
-	Convert ALLfolderMP3 320.sh
-	Convert FLACfolderMP3.sh
-		All .Flac files in folder will be converted to Mp3 in 320kbps.
-	Convert XXX to AACC.sh
-	Convert XXX to AC3.sh
-		-An easy way to convert audio (with video) AAC 6 channels to AC3 6 channels.
-	Convert XXX to DTS.sh
-		-DTS conversion is now considered stable (in most cases) , just try it before use.
-	Convert XXX to MP3 320.sh
+	Convert IMAGE to WALLPAPER_v1.sh
+		-You select one file and convert to common screen resolutions.
 		
-	Convert HDRtoSDR.SDR-x264-10b-ac3-48000hz-640k.sh
-	Convert HDRtoSDR-SDR-x264-10b-copy.sh
-	Convert HDRtoSDR-SDR-x264-10b-no-audio.sh
-		-Convert VIDEO HDR to SDR, for thoses who don't have HDR display.
-		-NO audio, ac3 or copy in final file. Use MKVtoolNIX or something else.
-		-HDR or HDR10 or HDR10+
-		-Will need to recode all file (Takes long time).
-		-You can find HDR and HDR10 files here https://4kmedia.org/
-
-![Screenshot](zzfromhdr.jpg)
-![Screenshot](zztosdr.jpg)
+	THE BEST TO USE
+	Convert IMAGE to WALLPAPER_v2.sh
+		-You select one file and convert to multiples resolutions.
+		-Convert only to your screen resolution.
+		-Convert to any resolution to fill (or remove) all the black bars.
 		
-	Convert XXX to 720p-x264-8b-30f.aac-2.0-44100hz.sh
-		-Excellent small format for facebook.
-	Convert XXX to 2160p-x264-10b-30f.dts-48000hz.sh
-		-HD 4k upscale or downnscale
-		-Takes 1 hour (ages) to downscale an 8k video of 2 min lengt.
-		
--Parallel ffmpeg (Uses all cores or select the numbers of cores you want)
+	Convert IMAGE to WALLPAPER_v3 (parallel).sh
+		-Convert the selected folder AND sub folder.
+		-Use parallel to faster convert.
 
-	Convert ALL folder 720p-x264-8b-30f.aac (parallel).sh
-	Convert ALL folder AC3 (parallel).sh
-	Convert ALL folder MP3 320 (parallel).sh
-		-Need ffmpeg and parallel to work.
+
+Convert ALL files:
+---------------------------------------------
+
+	Convert ALL to JPG (1500x1500).sh
+		Convert images files in folder to JPG format + 1500px.
+
+	Convert ALL to PNG.sh
+		Convert images files in folder to PNG format.
+		
+	Convert ALL to WEBP.sh
+		Convert images files in folder to WEBP format.
 	
-Creator files:
+	Convert ALL to WEBP (1500x1500).sh
+		Convert images files in folder to WEBP format + 1500px.
+
+	Convert ALL to WEBP (parallel).sh
+		Convert images files in folder to WEBP format.
+
+		
+Convert ONE files:
+---------------------------------------------
+		
+	Convert to JPG.sh
+		Convert one images file to JPG format.
+		
+	Convert to WEBP.sh
+		Convert one images file to WEBP format.
+		
+Image Upscaler files:
 ---------------------------------------------
 
-	creator CoverFolder.sh
-		-Take an image file (movie poster) and convert it to:
-		Cover.jpg an 500x500 px
-		Folder.jpg an 1000x1000 px
-		Name of folder reside in.jpg 1000x1000px
-		For music and movie folder.
-		
-	creator playlist all m3u in subfolder.sh
-		Create m3u in subfolder only.
-	creator playlist all music here.sh
-		Takes all mp3 find in subfolder and create m3u here.
-		
-![Screenshot](picture_5.png)
+Remember if there nothing to upscale, the results will be none.
 
-	Only one or two files are created, in the folder you specified. m3v are sorted by file name.
+	Upscale_ONE_FILE_image_xbrzscale_V2210270622.sh
+		Upscale one file you specify.
+		To JPG
+		Select ONE file and upscale it.
+		Re-Compress image if you want.
+	
+	Upscale_ALL_FOLDER_image_xbrzscale.sh_V_2210270622.sh
+		Upscale all files in folder you specified.
+		To JPG
+		Select one FOLDER and upscale all image (one by one).
+		Re-Compress image if you want.
 
-![Screenshot](picture_6.png)
+	Upscale_ALL_PARALLEL_image_xbrzscale_V_2210270622.sh
+		Same as 'all folder' but with gnu parallel.
+		To JPG
+		Faster
+		Select one FOLDER and GNU parallel upscale it.
+		Re-Compress image if you want.
 
-	creator playlist mp3 m3u.sh
-		-Create an m3u list for the specified folder.
-		-Only mp3 ... but you can change it in file.
-		
-		
+Screen of Upscale ONE FILE image xbrzscale.sh
+![Screenshot](v5.jpg)
+Original image file.
+![Screenshot](sca_ori.jpg)
+Upscaled image file.
+![Screenshot](sca_up.jpg)
+Image of the script. (Upscale_ONE_FILE_image_xbrzscale.sh)
+![Screenshot](v6.jpg)
 
-Extractor files:
----------------------------------------------
-
-	extract SRTfromMKV_choosefile.sh
-		-Exttract SRT files from a video, only extract first SRT if many present.
-	extract SRTfromMKV_samefolder.sh
-		-Exttract SRT files from all video files in folder.
-
-test files:
----------------------------------------------
-
-	testfile.aac51.mkv
-		-Audio in .mp4a (aac 6 ch), so you can test with this file for convert, extract or turn.
-		
 Others files:
 ---------------------------------------------
 
-	turn-video-90.sh
-		-Turn an video 90 deg angle.
-		-The video was turned the audio was copied.
+	Creator CoverFolderName.sh
+		Create files for music cover album or movie poster folder
+		Convert ONE image file to 1000 x 1000 px, poster.jpg
+		Convert ONE image file to 750 x 750 px, nameofthefolder.jpg
+		Convert ONE image file to 500 x 500 px, cover.jpg
+
 
 ---------------------------------------------
 
-Version 2021-02-16 - File converter - Convert XXXtoAC3
+Convert IMAGE to WALLPAPER_v2.sh and select image.
+![Screenshot](v2.jpg)
 
-![Screenshot](picture_1.jpg)
+Convert IMAGE to WALLPAPER_v3_(parallel).sh and multiple conversions.
+![Screenshot](v3.jpg)
 
-Version 2021-12-15 - Folder and Cover - creator CoverFolder
+Convert ALL to WEBP (parallel).sh and multiple core conversions.
+![Screenshot](v4.webp)
 
-![Screenshot](picture_2.jpg)
+	Policy to change to the file :
+	sudo gedit /etc/ImageMagick-6/policy.xml
 
----------------------------------------------
+![Screenshot](policy.jpg)
 
-Suggested ram size to convert (hd) video files:
-
-	720p -> 4gb
-	1080p -> 8gb
-	4k -> 16 gb
-	8k -> 32 gb
+	Tested on : ImageMagick 6.9.11-60 Q16 x86_64
 	
-Bitrate (normal std):
-
-	Cd -> 1.411k 16b 44100khz 	(Invented in 1979, release in 1982)
-	Ac3 -> 640k 48000khz 		(Created 1987)
-	Dts -> 768k and 1536k 48000khz 	(Created 1993)
-	AAC -> 448k 48000 khz 		(Created 1997)
-	Dts-hd -> 1536k 24b 48000khz 	(2004)
+	sudo gedit /etc/ImageMagick-6/policy.xml
 	
-	Sample rate:
-	AAC: 8 to 192 kHz
-	AC3: 32, 44.1, 48 kHz
-
-	Bitrate:	
-	AAC: 8-529 kbit/s (stereo)
-	AC3: 32-640 kbit/s 
+	convert -list resource
 	
-Resolutions:
-
-	Dvd -> 720 x 480
-	Hd -> 1280 x 720
-	Hd -> 1920 x 1080
-	4K -> 3840 x 2160
-	8K -> 7680 x 4320
-
----------------------------------------------
-
-	*How to correctly name a multimedia video file.
-	
-	source video and audio separated by an . (dot)
-	Video and audio data separated by - (dash)
-	
-    Movie.Title.year.Source.Video-Compression.Audio-Compression.ext
-    Movie.Title.year.Source.Video-Compression.Audio-Compression.language.srt
-    
-    {BluRay-2160p-5.1}.{SDR-x264-10b}.{dts}
-    {BluRay-1080p-7.1}.{SDR-x264-10b}.{dts-ac3}
-    {BluRay-1080p}.{SDR-x264-10b}.{none}
-    {WebDl-1080p-2.0}.{SDR-x264-10b}.{dts-ac3}
-
-    Br.8k-x266-12b-60f.Atmos-12.2
-    Br.2160px265.audio
-    Br.1080pX264.Dts51
-    Br.1080pX264.Ac351
-    Br.1080pX264.St
-    Br.720pX264.Ac351
-    Br.720pX264.Ac320
-    Dvd.480X264.Ac351
-    Dvd.480X264.St
-    Tv.SdX264.St
-
-	*Source:
-
-    Br      Blu-Ray source
-    Dvd     Dvd source
-    Tv      Tv or other low resolutions sources
-
-	*VideoRes:
-
-    4320p   8k
-    8k
-    2160p   4k , uhd , 3840 x 2160 , 2160p (4k bluray)
-    4k
-    1080p   1080, p or i (bluray)
-    720p    720, p or i (dvd)
-    480i    480, p or i
-    Sd      tv, lower than 480 p/i or other low resolutions sources
-
-	*AudioRes:   (Dts and Ac3 is supported in linux/windows)
-
-    Atmos   Atmos TrueHd (5.1 or more)
-    DtsHd   Dts 7.1
-    DtsEx   Dts 6.1
-    Dts51   Dts 5.1 or Dts-hd 5.1 (2.0 or more, max 5.1)
-    Ac351   Ac3 5.1
-    Ac320   Ac3 2.0 (Ac3 could be 1.0 to 5.1)
-    St      Stereo (always 2.0)
-    Mo      Mono (always 1.0)
-
-	*Extension:
-
-    eng     Language, only original language (Used for subtitles)
-    srt     subtitles
-
-	*Exemples:
-
-    Dune.2021.8k-x266-12b-60f.Atmos-12.2.mkv
-    Die.Hard.1988.Br.4kx26510b.Dts51.mkv
-    Die.Hard.1988.Br.4kx26510b.Dts51.eng.srt
-    Die.Hard.1988.Br.4kx26510b.Dts51.fra.srt
-    Jurassic.Park.1993.Br1080px264.Ac351.avi
-    Jurassic.Park.1993.Br1080px264.Ac351.eng.srt
-    Jurassic.Park.1993.Br1080px264.Ac351.chn.srt
-    
-    Jurassic.Park.1993.{BluRay-2160p-7.1}.{SDR-x265-10b}.{dts-ac3}.mkv
-    
-    VLC will auto load theses srt files; same name of the video file.
+	ImgMack policy are SO LOW you need to change them to something usable
+	ex: mem 12GiB , disk 64GiB
 
 
 ---------------------------------------------
