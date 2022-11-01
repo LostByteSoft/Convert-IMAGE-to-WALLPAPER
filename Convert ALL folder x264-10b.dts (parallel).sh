@@ -2,7 +2,7 @@
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
 	#printf '\033[8;40;80t'		# will resize the window, if needed.
-	printf '\033[8;40;125t'		# will resize the window, if needed.
+	printf '\033[8;40;125t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
 	sleep 0.50
 	
@@ -24,44 +24,47 @@ echo -------------------------========================-------------------------
 
 echo -------------------------========================-------------------------
 
-	echo Version compiled on : Also serves as a version
-	echo 2022-02-18_Friday_02:15:25
-	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Creator Cover Folder Name"
-	echo "File name: Creator CoverFolderName.sh"
+	echo "Software name: Convert MANY files to video Convert ALL folder 720p-x264-8b-30f.aac (parallel)"
 	echo
 	echo What it does ?
-	echo "You specify ONE image file and this convert to THREE files."
+	echo "Convert MANY video file to Convert ALL folder 720p-x264-8b-30f.aac (parallel).sh"
 	echo
-	echo "Read me for this file (and known bugs) :"
-	echo
-	echo "Create images files for music cover, album cover and movie poster."
-	echo
-	echo "Convert ONE image file to 1000 x 1000 px, poster.jpg"
-	echo "Convert ONE image file to 750 x 750 px, nameofthefolder.jpg"
-	echo "Convert ONE image file to 500 x 500 px, cover.jpg"
-	echo "Bash and imagemagick only"
-	echo
-	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft."
+	echo Informations :
+	echo "By LostByteSoft, no copyright or copyleft"
 	echo "https://github.com/LostByteSoft"
+	echo "Use ffmpeg only"
+	echo "https://ffmpeg.org/ffmpeg.html"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
-
+	echo Version compiled on : Also serves as a version
+	echo 2022-02-14_Monday_08:05:14
+echo -------------------------========================-------------------------
 echo "Check installed requirements !"
 
-if command -v imagemagick >/dev/null 2>&1
+if command -v ffmpeg >/dev/null 2>&1
 	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
+		echo "Ffmpeg installed continue."
+		dpkg -s ffmpeg | grep Version
+	else
+		echo "You don't have ' parallel ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install ffmpeg"
 		echo -------------------------========================-------------------------
 		sleep 10
 		exit
+fi
+
+if command -v parallel >/dev/null 2>&1
+	then
+		echo "Parallel installed continue."
+		dpkg -s parallel | grep Version
 	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
+		echo "You don't have ' parallel ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install parallel"
+		echo -------------------------========================-------------------------
+		sleep 10
+		exit
 fi
 
 echo -------------------------========================-------------------------
@@ -101,10 +104,32 @@ echo Function Auto Quit. If autoquit=1 will automaticly quit.
 		fi
 
 echo -------------------------========================-------------------------
+echo "Numbers of parallel multi-cores to use ?"
+	cpu=$(nproc)
+	defv=$(( cpu / 4 ))	## for video files
+	defa=$(nproc)		## for audio files
+	defi=$(( cpu * 2 ))	## for images files
+	#echo cpu = $cpu
+	#echo defv = $defv
+	#echo defa = $defa
+	#echo defi = $defi
+	entry=$(zenity --scale --value="$defa" --min-value="1" --max-value="32" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have "$cpu" total cores !\n\n\tDefault suggested value is "$defv" for video.\n\n\tDefault suggested value is "$defa" for audio.\n\n\tDefault suggested value is "$defi" for images.\n\n(1 to whatever core you want to use will work anyway !)")
+
+if test -z "$entry"
+	then
+		echo "Default value of $cpu will be used. Now continue in 3 seconds."
+		entry=$(nproc)
+		echo "You have selected : $entry"
+		#sleep 3
+	else
+		echo "You have selected : $entry"
+fi
+
+echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -137,32 +162,15 @@ echo "Input name, directory and output name : (Debug helper)"
 echo -------------------------========================-------------------------
 ## Variables, for program."
 	part=0
-	debug=0
-echo "Get the last Folder :"
-	INPUT="$(dirname "${VAR}")"
-	echo ${INPUT##*/} 
+
 ## The code program.
-
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	error $?
+	#parallel -j $entry ffmpeg -i {} -vf scale=1280x720:flags=lanczos,format=yuv420p -c:v libx264 -crf 20 -c:a aac -ar 44100 -ac 2 -b:a 192k {.}.720p-x264-8b.aac.mkv ::: "$file"/*.*
 
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	echo mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	echo mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
+	parallel -j $entry ffmpeg -i {} -vf format=yuv420p10le -c:v libx264 -crf 20 -preset faster -tune fastdecode -strict experimental -c:a dts -ar 48000 -b:a 768k {.}.x264-10b.dts-5.1.mkv ::: "$file"/*.*
+
+## Error detector.
 	error $?
 	
 echo -------------------------========================-------------------------

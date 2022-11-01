@@ -25,45 +25,42 @@ echo -------------------------========================-------------------------
 echo -------------------------========================-------------------------
 
 	echo Version compiled on : Also serves as a version
-	echo 2022-02-18_Friday_02:15:25
+	echo 2022-09-09_Friday_12:35:10
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Creator Cover Folder Name"
-	echo "File name: Creator CoverFolderName.sh"
+	echo "Software name: Convert x265-10b-30f.dts.sh"
 	echo
 	echo What it does ?
-	echo "You specify ONE image file and this convert to THREE files."
+	echo "Convert ONE video file to {SDR-x265-10b}.{dts}.mkv"
 	echo
 	echo "Read me for this file (and known bugs) :"
 	echo
-	echo "Create images files for music cover, album cover and movie poster."
+	echo "Use 7z https://www.7-zip.org/download.html"
+	echo "Use https://imagemagick.org/index.php"
+	echo "Use Gnu Parallel https://www.gnu.org/software/parallel/"
+	echo "Use ffmpeg https://ffmpeg.org/ffmpeg.html"
 	echo
-	echo "Convert ONE image file to 1000 x 1000 px, poster.jpg"
-	echo "Convert ONE image file to 750 x 750 px, nameofthefolder.jpg"
-	echo "Convert ONE image file to 500 x 500 px, cover.jpg"
-	echo "Bash and imagemagick only"
+	echo "Options https://trac.ffmpeg.org/wiki/Encode/H.265"
+	echo "4k demo HDR https://www.demolandia.net"
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft."
-	echo "https://github.com/LostByteSoft"
+	echo "By LostByteSoft, no copyright or copyleft. https://github.com/LostByteSoft"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
 
-echo "Check installed requirements !"
+echo "Check installed requirement !"
 
-if command -v imagemagick >/dev/null 2>&1
+if command -v ffmpeg >/dev/null 2>&1
 	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
+		echo "Ffmpeg installed continue."
+	else
+		echo "You don't have ' ffmpeg ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install ffmpeg"
 		echo -------------------------========================-------------------------
 		sleep 10
 		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
 fi
-
 echo -------------------------========================-------------------------
 echo Function Debug. Activate via source program debug=1.
 
@@ -137,32 +134,34 @@ echo "Input name, directory and output name : (Debug helper)"
 echo -------------------------========================-------------------------
 ## Variables, for program."
 	part=0
-	debug=0
-echo "Get the last Folder :"
-	INPUT="$(dirname "${VAR}")"
-	echo ${INPUT##*/} 
+	res=0		# automatic resolution detection and naming (720, 1080... etc)
+
 ## The code program.
-
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
+	
+	echo "Get resolution of the video file"
+	res=`ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=s=x:p=0 $file`
+	#res1=${res::-1}
+	echo $res
 	error $?
-
+	
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	echo mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	echo mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
+	
+	echo "ffmpeg conversion"
+
+	### debug pixel info
+	### ffmpeg -h encoder=libx265 | grep pixel
+	###Better quality and x265 (Need a bigger PC) (medium) {SDR.x265.10b}.{dts}"
+
+	ffmpeg -i "$file" -vf format=yuv420p10le -c:v libx265 -crf 20 -preset faster -tune fastdecode -strict experimental -c:a dts "$name".{"$res"p-5.1}.{SDR-x264-10b}.{dts}.mkv
+
+	### better quality and x265 (Need a bigger PC) (Hi) (x265 10bit)
+	### ffmpeg -i "$file" -vf zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p10le -c:v libx265 -crf 20 -r:v 30 -an -preset superfast -tune fastdecode "$NAME".{SDR.x265.10b}.{no.audio}.mkv
+	## -preset ultrafast
+	## -preset medium
+
 	error $?
 	
 echo -------------------------========================-------------------------

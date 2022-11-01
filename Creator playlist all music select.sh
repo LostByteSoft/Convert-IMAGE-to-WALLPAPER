@@ -16,72 +16,62 @@ echo -------------------------========================-------------------------
 	yellow=`tput setaf 11`
 	blue=`tput setaf 12`
 	reset=`tput sgr0`
-## COmmon variables, you can changes theses variables as you wish to test (0 or 1)
+
+## Common variables, you can changes theses variables as you wish to test (0 or 1)
 	autoquit=0	# autoquit anyway to script takes more than 2 min to complete
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
+	
+	echo autoquit=$autoquit debug=$debug error=$error
 
 echo -------------------------========================-------------------------
-
 	echo Version compiled on : Also serves as a version
-	echo 2022-02-18_Friday_02:15:25
+	echo 2022-10-21_Friday_10:44:57
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Creator Cover Folder Name"
-	echo "File name: Creator CoverFolderName.sh"
+	echo "Software name: Creator playlist all music"
+	echo "File name : Creator playlist all music select.sh"
 	echo
 	echo What it does ?
-	echo "You specify ONE image file and this convert to THREE files."
+	echo "Auto create m3u playlist for folders (with autoname)"
 	echo
-	echo "Read me for this file (and known bugs) :"
+	echo "Will create an m3u file in the folder you selected."
+	echo "All audio files in sub folders are find and put in file"
+	echo "Take the name of previous folder for *.m3u name"
+	echo "Will create an *.m3u file for group of *.mp3 in THE DIRECT FOLDER"
+	echo "Will do not create for folders or sub folders."
 	echo
-	echo "Create images files for music cover, album cover and movie poster."
-	echo
-	echo "Convert ONE image file to 1000 x 1000 px, poster.jpg"
-	echo "Convert ONE image file to 750 x 750 px, nameofthefolder.jpg"
-	echo "Convert ONE image file to 500 x 500 px, cover.jpg"
-	echo "Bash and imagemagick only"
-	echo
-	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft."
+	echo Informations :
+	echo "By LostByteSoft, no copyright or copyleft"
 	echo "https://github.com/LostByteSoft"
+	echo "Version 2021-12-14 Original release"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
-echo -------------------------========================-------------------------
-
-echo "Check installed requirements !"
-
-if command -v imagemagick >/dev/null 2>&1
-	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
-		echo -------------------------========================-------------------------
-		sleep 10
-		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
-fi
 
 echo -------------------------========================-------------------------
 echo Function Debug. Activate via source program debug=1.
-
 debug()
-if [ "$debug" -ge 1 ]; then
+	if [ "$debug" -ge 1 ]; then
 		echo
-		echo "${yellow}██████████████████████████████ DEBUG SLEEP ███████████████████████████████${reset}"
+		echo "${yellow}█████████████████████████████████ DEBUG ██████████████████████████████████${reset}"
 		echo
-		echo debug = $debug 	part = $part 	input = $input
+		echo debug = $debug 	part = $part 	file = $file
 		echo cpu = $cpu 	defv = $defv 	defa = $defa
 		echo defi = $defi 	entry = $entry 	autoquit = $autoquit
 		echo 
-		read -n 1 -s -r -p "Press any key to EXIT"
-		exit
-		fi
+		read -n 1 -s -r -p "Press any key to continue"
+		#exit
+	fi
+	
+		if [ "$debug" -eq "1" ]; then
+		echo
+		echo "${yellow}██████████████████████████████ DEBUG ACTIVATED ███████████████████████████${reset}"
+		echo
+	fi
 
 echo Function Error detector. If errorlevel is 1 or greater will show error msg.
-	error()
+error()
 	if [ "$?" -ge 1 ]; then
 		part=$((part+1))
 		echo
@@ -91,20 +81,20 @@ echo Function Error detector. If errorlevel is 1 or greater will show error msg.
 		echo
 		read -n 1 -s -r -p "Press any key to CONTINUE"
 		echo
-		fi
+	fi
 
 echo Function Auto Quit. If autoquit=1 will automaticly quit.
 	if [ "$autoquit" -eq "1" ]; then
 		echo
 		echo "${blue}████████████████████████████ AUTO QUIT ACTIVATED █████████████████████████${reset}"
 		echo
-		fi
+	fi
 
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -121,10 +111,14 @@ echo -------------------------========================-------------------------
 echo "Input name, directory and output name : (Debug helper)"
 ## Set working path.
 	dir=$(pwd)
+## file or folder selected
 	echo "Working dir : "$dir""
 	echo Input file : "$file"
 	export VAR="$file"
 	echo
+## directory section
+	INPUT="$(dirname "${VAR}")"	
+	echo "Get the last Folder : ${INPUT##*/}"
 	echo Base directory : "$(dirname "${VAR}")"
 	echo Base name: "$(basename "${VAR}")"
 	echo
@@ -135,38 +129,77 @@ echo "Input name, directory and output name : (Debug helper)"
 	echo "Output name bis : "$name1""
 	
 echo -------------------------========================-------------------------
-## Variables, for program."
-	part=0
-	debug=0
-echo "Get the last Folder :"
-	INPUT="$(dirname "${VAR}")"
-	echo ${INPUT##*/} 
-## The code program.
+echo "The code program."
 
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
+	echo "Finding files..."
+	echo file = "$file"
+	echo "(basename "${VAR}")" = "$(basename "${VAR}")"
+
+	#find "$file" . -type f \( -name '*.mp3' -o -name '*.flac' -o -name '*.ac3' -o -name '*.dts' \) -printf "%P\n" > "$file"/"$(basename "${VAR}")".m3u
+	find "$file" . -type f \( -name '*.mp3' -o -name '*.flac' -o -name '*.ac3' -o -name '*.dts' \) -printf "%P\n" > "/dev/shm/m3u.tmp"
 	error $?
 
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	echo mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	echo mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
+	echo "Listing..."
+	sleep 1
+	#cat "$file"/"$(basename "${VAR}")".m3u
+	cat "/dev/shm/m3u.tmp"
 	error $?
 	
+	part=$((part+1))
+	echo "-------------------------===== Section $part =====-------------------------"
+	echo "Name sort (Yes or No (Suggest Yes))"
+	if zenity --question --text="Do you want to sort by file name ? (Yes or No (Suggest Yes))"
+	then
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		#sort "$file"/"$(basename "${VAR}")".m3u > "$file"/"$(basename "${VAR}")".m3v
+		sort "/dev/shm/m3u.tmp" > "/dev/shm/m3u.srt"
+		cp "/dev/shm/m3u.srt" "$file"/"$(basename "${VAR}")".m3u
+		cat "$file"/"$(basename "${VAR}")".m3u
+		echo
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		echo "Files are sorted and m3u is in $file"
+	else
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		cp "/dev/shm/m3u.srt" "$file"/"$(basename "${VAR}")".m3u
+		cat "$file"/"$(basename "${VAR}")".m3u
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		echo "Files are NOT sorted and m3u is in $file"
+	fi
+	error $?
+
+echo -------------------------========================-------------------------
+## Software lead-out.
+	echo "Finish... with numbers of actions : $part"
+	echo "This script take $(( SECONDS - start )) seconds to complete."
+	date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
+	echo "Time needed: $date"
+	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
+	echo "Current time : $now"
+
+echo -------------------------========================-------------------------
+## Press enter or auto-quit here.
+	echo "If a script takes MORE than 120 seconds to complete it will ask"
+	echo "you to press ENTER to terminate."
+	echo
+	echo "If a script takes LESS than 120 seconds to complete it will auto"
+	echo "terminate after 10 seconds"
+	echo
+
 echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
+	echo
+	echo Processing file of "$name1" finish !
+	echo
+	debug $?
+
 if [ "$autoquit" -eq "1" ]
 then
 		echo "Script will auto quit in 1 seconds."
@@ -179,15 +212,18 @@ then
 	if [ $(( SECONDS - start )) -gt 120 ]
 		then
 			echo "Script takes more than 120 seconds to complete."
-			echo "Press ENTER key to exit !"
 			echo
 			echo "${yellow}████████████████████████████████ Finish ██████████████████████████████████${reset}"
-			read name
+			echo
+			echo -------------------------========================-------------------------
+			read -n 1 -s -r -p "Press ENTER key to exit !"
 		else
 			echo "Script takes less than 120 seconds to complete."
-			echo "Auto-quit in 10 sec. (You can press X)"
 			echo
 			echo "${green}████████████████████████████████ Finish ██████████████████████████████████${reset}"
+			echo
+			echo -------------------------========================-------------------------
+			echo "Auto-quit in 10 sec. (You can press X)"
 			sleep 10
 		fi
 	}
@@ -197,9 +233,9 @@ then
 
 ## -----===== End of bash =====-----
 
-End-user license agreement (eula)
+	End-user license agreement (eula)
 
- 	JUST DO WHAT YOU WANT WITH THE PUBLIC LICENSE
+ 	JUST DO WHAT THE F*** YOU WANT WITH THE PUBLIC LICENSE
  	
  	Version 3.1415926532 (January 2022)
  	
@@ -215,6 +251,8 @@ End-user license agreement (eula)
  	warranty, electrocution, drowning, divorce, civil war, the effects of radiation
  	due to atomic fission, unexpected tax recalls or encounters with
  	extraterrestrial beings elsewhere.
+ 	
+ 	YOU MUST ACCEPT THESES TERMS OR NOTHING WILL HAPPEN.
  	
  	LostByteSoft no copyright or copyleft we are in the center.
 

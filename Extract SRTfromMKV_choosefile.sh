@@ -24,46 +24,19 @@ echo -------------------------========================-------------------------
 
 echo -------------------------========================-------------------------
 
-	echo Version compiled on : Also serves as a version
-	echo 2022-02-18_Friday_02:15:25
-	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Creator Cover Folder Name"
-	echo "File name: Creator CoverFolderName.sh"
+	echo "Software name: extract SRTfromMKV_choosefile"
 	echo
 	echo What it does ?
-	echo "You specify ONE image file and this convert to THREE files."
+	echo "Extract subtitles from MKV file MKV IDX SUB for a specified file"
 	echo
-	echo "Read me for this file (and known bugs) :"
-	echo
-	echo "Create images files for music cover, album cover and movie poster."
-	echo
-	echo "Convert ONE image file to 1000 x 1000 px, poster.jpg"
-	echo "Convert ONE image file to 750 x 750 px, nameofthefolder.jpg"
-	echo "Convert ONE image file to 500 x 500 px, cover.jpg"
-	echo "Bash and imagemagick only"
-	echo
-	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft."
+	echo Informations :
+	echo "By LostByteSoft, no copyright or copyleft"
 	echo "https://github.com/LostByteSoft"
+	echo "https://askubuntu.com/questions/452268/extract-subtitle-from-mkv-files"
+	echo "Author: https://askubuntu.com/users/230052/nux"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
-echo -------------------------========================-------------------------
-
-echo "Check installed requirements !"
-
-if command -v imagemagick >/dev/null 2>&1
-	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
-		echo -------------------------========================-------------------------
-		sleep 10
-		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
-fi
-
 echo -------------------------========================-------------------------
 echo Function Debug. Activate via source program debug=1.
 
@@ -101,69 +74,58 @@ echo Function Auto Quit. If autoquit=1 will automaticly quit.
 		fi
 
 echo -------------------------========================-------------------------
-echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
-	## --file-filter="*.jpg *.gif"
+#DIR="$(zenity --file-selection --filename=$HOME/$USER --file-filter=*.mkv --title="Select a file *.mkv")"
+DIR="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file *.*")"
 
-if test -z "$file"
+echo -----------------------------------------------------------------------------
+
+if test -z "$DIR"
 	then
-		echo "You don't have selected a file, now exit in 3 seconds."
-		echo -------------------------========================-------------------------
-		sleep 3
+		echo "\$DIR is empty and now exit. You don't have selected a file."
+		echo Press ENTER to continue.
+		read name
 		exit
 	else
-		echo "You have selected :"
-		echo "$file"
+		echo "\$DIR is NOT empty."
+		echo "You have selected "$DIR""
 fi
-echo -------------------------========================-------------------------
-echo "Input name, directory and output name : (Debug helper)"
-## Set working path.
-	dir=$(pwd)
-	echo "Working dir : "$dir""
-	echo Input file : "$file"
-	export VAR="$file"
-	echo
-	echo Base directory : "$(dirname "${VAR}")"
-	echo Base name: "$(basename "${VAR}")"
-	echo
-## Output file name
-	name=`echo "$file" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	echo "Output name ext : "$name""
-	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	echo "Output name bis : "$name1""
-	
-echo -------------------------========================-------------------------
-## Variables, for program."
-	part=0
-	debug=0
-echo "Get the last Folder :"
-	INPUT="$(dirname "${VAR}")"
-	echo ${INPUT##*/} 
-## The code program.
 
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	error $?
+echo -----------------------------------------------------------------------------
 
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	echo mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	echo mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	error $?
+	echo "Please wait..."
+	#echo DIR = "$DIR"
+	#echo Press ENTER to continue.
+	#read name
+
+echo -----------------------------------------------------------------------------
+
+# Get all the MKV files in this dir and its subdirs
+find "$DIR" -type f -name '*.m2ts' | while read filename
+do
+  # Find out which tracks contain the subtitles
+  mkvmerge -i "$filename" | grep 'subtitles' | while read subline
+  do
+    # Grep the number of the subtitle track
+    tracknumber=`echo $subline | egrep -o "[0-9]{1,2}" | head -1`
+
+    # Get base name for subtitle
+    subtitlename=${filename%.*}
+
+    # Extract the track to a .tmp file
+    `mkvextract tracks "$filename" $tracknumber:"$subtitlename.srt" > /dev/null 2>&1`
+    `chmod g+rw "$subtitlename.srt"`
+  done
+done
+
+## Error detector.
+if [ "$?" -ge 1 ]; then
+	echo "!!! ERROR was detected !!! Press ENTER key to terminate !!!"
+	echo
+	echo "${red}ERROR ███████████████████████████ ERROR █████████████████████████████ ERROR ${reset}"
+	read name
+	exit
+fi
 	
 echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.

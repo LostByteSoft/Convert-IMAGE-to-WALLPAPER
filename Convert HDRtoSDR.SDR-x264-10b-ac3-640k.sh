@@ -2,7 +2,7 @@
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
 	#printf '\033[8;40;80t'		# will resize the window, if needed.
-	printf '\033[8;40;125t'		# will resize the window, if needed.
+	printf '\033[8;40;125t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
 	sleep 0.50
 	
@@ -25,63 +25,59 @@ echo -------------------------========================-------------------------
 echo -------------------------========================-------------------------
 
 	echo Version compiled on : Also serves as a version
-	echo 2022-02-18_Friday_02:15:25
+	echo 2022-10-05_Wednesday_06:31:55
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Creator Cover Folder Name"
-	echo "File name: Creator CoverFolderName.sh"
+	echo "Software name: Convert HDRtoSDR-SDR-x264-10b-ac3-48000hz-640k"
 	echo
 	echo What it does ?
-	echo "You specify ONE image file and this convert to THREE files."
+	echo "Convert ONE video file HDR to SDR Convert HDRtoSDR-SDR-x264-10b-ac3-48000hz-640k"
 	echo
 	echo "Read me for this file (and known bugs) :"
 	echo
-	echo "Create images files for music cover, album cover and movie poster."
+	echo "Use 7z https://www.7-zip.org/download.html"
+	echo "Use https://imagemagick.org/index.php"
+	echo "Use Gnu Parallel https://www.gnu.org/software/parallel/"
+	echo "Use ffmpeg https://ffmpeg.org/ffmpeg.html"
 	echo
-	echo "Convert ONE image file to 1000 x 1000 px, poster.jpg"
-	echo "Convert ONE image file to 750 x 750 px, nameofthefolder.jpg"
-	echo "Convert ONE image file to 500 x 500 px, cover.jpg"
-	echo "Bash and imagemagick only"
+	echo "Options https://trac.ffmpeg.org/wiki/Encode/H.264"
+	echo "4k demo HDR https://www.demolandia.net"
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft."
-	echo "https://github.com/LostByteSoft"
+	echo "By LostByteSoft, no copyright or copyleft. https://github.com/LostByteSoft"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
 
-echo "Check installed requirements !"
+echo "Check installed requirement !"
 
-if command -v imagemagick >/dev/null 2>&1
+if command -v ffmpeg >/dev/null 2>&1
 	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
+		echo "Ffmpeg installed continue."
+	else
+		echo "You don't have ' ffmpeg ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install ffmpeg"
 		echo -------------------------========================-------------------------
 		sleep 10
 		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
 fi
-
 echo -------------------------========================-------------------------
 echo Function Debug. Activate via source program debug=1.
-
 debug()
-if [ "$debug" -ge 1 ]; then
+	if [ "$debug" -ge 1 ]; then
 		echo
-		echo "${yellow}██████████████████████████████ DEBUG SLEEP ███████████████████████████████${reset}"
+		echo "${yellow}█████████████████████████████████ DEBUG ██████████████████████████████████${reset}"
 		echo
-		echo debug = $debug 	part = $part 	input = $input
+		echo debug = $debug 	part = $part 	file = $file
 		echo cpu = $cpu 	defv = $defv 	defa = $defa
 		echo defi = $defi 	entry = $entry 	autoquit = $autoquit
 		echo 
-		read -n 1 -s -r -p "Press any key to EXIT"
-		exit
-		fi
+		read -n 1 -s -r -p "Press any key to continue"
+		#exit
+	fi
 
 echo Function Error detector. If errorlevel is 1 or greater will show error msg.
-	error()
+error()
 	if [ "$?" -ge 1 ]; then
 		part=$((part+1))
 		echo
@@ -91,14 +87,14 @@ echo Function Error detector. If errorlevel is 1 or greater will show error msg.
 		echo
 		read -n 1 -s -r -p "Press any key to CONTINUE"
 		echo
-		fi
+	fi
 
 echo Function Auto Quit. If autoquit=1 will automaticly quit.
 	if [ "$autoquit" -eq "1" ]; then
 		echo
 		echo "${blue}████████████████████████████ AUTO QUIT ACTIVATED █████████████████████████${reset}"
 		echo
-		fi
+	fi
 
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
@@ -135,38 +131,78 @@ echo "Input name, directory and output name : (Debug helper)"
 	echo "Output name bis : "$name1""
 	
 echo -------------------------========================-------------------------
-## Variables, for program."
-	part=0
-	debug=0
-echo "Get the last Folder :"
-	INPUT="$(dirname "${VAR}")"
-	echo ${INPUT##*/} 
+	echo The program start here.
+	res=0		# automatic resolution detection and naming (720, 1080... etc)
+	audio=0		# get numbers of channels
+
 ## The code program.
-
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
+	
+	echo "Get resolution and numbers of audio channel(s) of the multimedia file"
+	res=`ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=s=x:p=0 "$file"`
+	#res1=${res::-1}	#somes video are detected with an X after the resution, this remove the X
+	echo Resolution of the video : $res
 	error $?
-
+	
+	audio=`ffprobe -show_entries stream=channels -of compact=p=0:nk=1 -v 0 "$file"`
+	echo Numbers of audio channel : $audio
+	error $?	
+	
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	echo mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	echo mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
+echo "ffmpeg conversion"
+
+### debug pixel info
+### ffmpeg -h encoder=libx265 | grep pixel
+
+### x264 8b preset
+
+### good quality (Low) (x264 8bit)
+### ffmpeg -i "$file" -vf zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p -c:v libx264 -crf 25 -r:v 30 -an -preset superfast -tune fastdecode -max_muxing_queue_size 1024 "$NAME".{SDR.x264.8b}.{no.audio}.mkv
+
+### compromis x264 (normal pc will do the job) (Medium) (x264 8bit)
+### ffmpeg -i "$file" -vf zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p -c:v libx264 -crf 20 -r:v 30 -an -preset superfast -tune fastdecode "$NAME".{SDR.x264.8b}.{no.audio}.mkv
+
+###Better quality and x264 (Need a bigger PC) (medium) {SDR.x264.10b}"
+ffmpeg -i "$file" -vf zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p10le -c:v libx264 -r:v 30 -crf 20 -preset faster -tune fastdecode -c:a ac3 -ar 48000 -b:a 640k "$name".{BluRay-2160p-5.1}.{SDR-x264-10b}.{ac3}.mkv
+
+###Better quality and x264 (Need a bigger PC) (medium) {SDR.x264.10b}" -r:v 30
+#ffmpeg -i "$file" -vf zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p10le -c:v libx264 -r:v 30 -crf 20 -preset faster -tune fastdecode -c:a ac3 -ar 48000 -b:a 640k "$name".{BluRay-2160p-5.1}.{SDR-x264-10b}.{ac3}.mkv
+
+### x265 10b presets
+
+### better quality and x265 (Need a bigger PC) (Hi) (x265 10bit)
+### ffmpeg -i "$file" -vf zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p10le -c:v libx265 -crf 20 -r:v 30 -an -preset superfast -tune fastdecode "$NAME".{SDR.x265.10b}.{no.audio}.mkv
+
+## -preset ultrafast
+## -preset medium
+
 	error $?
 	
 echo -------------------------========================-------------------------
+## Software lead-out.
+	echo "Finish... with numbers of actions : $part"
+	echo "This script take $(( SECONDS - start )) seconds to complete."
+	date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
+	echo "Time needed: $date"
+	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
+	echo "Current time : $now"
+
+echo -------------------------========================-------------------------
+## Press enter or auto-quit here.
+	echo "${yellow}If a script takes MORE than 120 seconds to complete it will ask you to take action !${reset}"
+	echo "Press ENTER to terminate."
+	echo
+	echo "${green}If a script takes LESS than 120 seconds to complete it will auto-terminate !${reset}"
+	echo "Auto-terminate after 10 seconds"
+	echo
+
+echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
+	echo
+	echo Processing file of "$name1" finish !
+	echo
 if [ "$autoquit" -eq "1" ]
 then
 		echo "Script will auto quit in 1 seconds."

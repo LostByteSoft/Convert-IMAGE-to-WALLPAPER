@@ -23,45 +23,44 @@ echo -------------------------========================-------------------------
 	part=0		# don't change this value
 
 echo -------------------------========================-------------------------
-
 	echo Version compiled on : Also serves as a version
-	echo 2022-02-18_Friday_02:15:25
+	echo 2022-02-18_Friday_08:03:40
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Creator Cover Folder Name"
-	echo "File name: Creator CoverFolderName.sh"
+	echo "Software name: Convert ALL folder to AC3"
 	echo
 	echo What it does ?
-	echo "You specify ONE image file and this convert to THREE files."
+	echo "Convert ALL audio/video file in folder to audio AC3 ac3-48000hz-640k"
+	echo
+	echo "This is a single core conversion"
 	echo
 	echo "Read me for this file (and known bugs) :"
 	echo
-	echo "Create images files for music cover, album cover and movie poster."
+	echo "Use 7z https://www.7-zip.org/download.html"
+	echo "Use https://imagemagick.org/index.php"
+	echo "Use Gnu Parallel https://www.gnu.org/software/parallel/"
+	echo "Use ffmpeg https://ffmpeg.org/ffmpeg.html"
 	echo
-	echo "Convert ONE image file to 1000 x 1000 px, poster.jpg"
-	echo "Convert ONE image file to 750 x 750 px, nameofthefolder.jpg"
-	echo "Convert ONE image file to 500 x 500 px, cover.jpg"
-	echo "Bash and imagemagick only"
+	echo "Options https://trac.ffmpeg.org/wiki/Encode/H.264"
+	echo "4k demo HDR https://www.demolandia.net"
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft."
-	echo "https://github.com/LostByteSoft"
+	echo "By LostByteSoft, no copyright or copyleft. https://github.com/LostByteSoft"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
+echo "Check installed requirement !"
 
-echo "Check installed requirements !"
-
-if command -v imagemagick >/dev/null 2>&1
+if command -v ffmpeg >/dev/null 2>&1
 	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
+		echo "Ffmpeg installed continue."
+		dpkg -s ffmpeg | grep Version
+	else
+		echo "You don't have ' ffmpeg ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install ffmpeg"
 		echo -------------------------========================-------------------------
 		sleep 10
 		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
 fi
 
 echo -------------------------========================-------------------------
@@ -103,8 +102,8 @@ echo Function Auto Quit. If autoquit=1 will automaticly quit.
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -138,33 +137,22 @@ echo -------------------------========================-------------------------
 ## Variables, for program."
 	part=0
 	debug=0
-echo "Get the last Folder :"
-	INPUT="$(dirname "${VAR}")"
-	echo ${INPUT##*/} 
 ## The code program.
 
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	error $?
-
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	echo mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	echo mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	error $?
+ext=$(zenity --entry --text="Enter the correct INPUT extension type without the dot (ex: aac , eac3) ?")
 	
+for i in "$file"/*.$ext;
+	do name=`echo "$i" | rev | cut -f 2- -d '.' | rev`
+	part=$((part+1))
+	echo "-------------------------===== Section $part =====-------------------------"
+	echo i="$i"
+	echo name="$name"
+	export VAR="$i"
+	ffmpeg -i "$i" -c:s copy -c:v copy -c:a ac3 -ar 48000 -b:a 640k "$name".ac3-48000hz-640k.ac3
+	done
+	
+error $?
+
 echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
 if [ "$autoquit" -eq "1" ]

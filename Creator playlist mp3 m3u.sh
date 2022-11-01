@@ -1,8 +1,8 @@
 #!/bin/bash
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
-	#printf '\033[8;40;80t'		# will resize the window, if needed.
-	printf '\033[8;40;125t'		# will resize the window, if needed.
+	printf '\033[8;40;80t'		# will resize the window, if needed.
+	#printf '\033[8;40;125t'		# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
 	sleep 0.50
 	
@@ -24,46 +24,23 @@ echo -------------------------========================-------------------------
 
 echo -------------------------========================-------------------------
 
-	echo Version compiled on : Also serves as a version
-	echo 2022-02-18_Friday_02:15:25
-	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Creator Cover Folder Name"
-	echo "File name: Creator CoverFolderName.sh"
+	echo "Software name: creator playlist mp3 m3u"
 	echo
 	echo What it does ?
-	echo "You specify ONE image file and this convert to THREE files."
+	echo "Auto create m3u playlist for folders (with autoname)"
 	echo
-	echo "Read me for this file (and known bugs) :"
-	echo
-	echo "Create images files for music cover, album cover and movie poster."
-	echo
-	echo "Convert ONE image file to 1000 x 1000 px, poster.jpg"
-	echo "Convert ONE image file to 750 x 750 px, nameofthefolder.jpg"
-	echo "Convert ONE image file to 500 x 500 px, cover.jpg"
-	echo "Bash and imagemagick only"
-	echo
-	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft."
+	echo Informations :
+	echo "By LostByteSoft, no copyright or copyleft"
 	echo "https://github.com/LostByteSoft"
+	echo "Version 2021-12-14 Original release"
+	echo "Version 2021-12-15 folder select"
+	echo "Version 2021-12-16 debug update"
+	echo "--- Read me ---"
+	echo "Select a MUSIC MP3 folder and create m3u for this folder."
+	echo "Will take the folder name for the *.m3u name"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
-echo -------------------------========================-------------------------
-
-echo "Check installed requirements !"
-
-if command -v imagemagick >/dev/null 2>&1
-	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
-		echo -------------------------========================-------------------------
-		sleep 10
-		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
-fi
-
 echo -------------------------========================-------------------------
 echo Function Debug. Activate via source program debug=1.
 
@@ -103,8 +80,8 @@ echo Function Auto Quit. If autoquit=1 will automaticly quit.
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -118,52 +95,73 @@ if test -z "$file"
 		echo "$file"
 fi
 echo -------------------------========================-------------------------
-echo "Input name, directory and output name : (Debug helper)"
-## Set working path.
+echo "Input name and output name"
+
+	## Set working path.
+	# mypath=`realpath $0`
+	# cd `dirname $mypath`
 	dir=$(pwd)
+
+	NAME=`echo "$FILE" | cut -d'.' -f1`
+	echo "Output file : "$NAME" (if implemented)"
+	
 	echo "Working dir : "$dir""
-	echo Input file : "$file"
-	export VAR="$file"
-	echo
+	export VAR="$FILE"
 	echo Base directory : "$(dirname "${VAR}")"
-	echo Base name: "$(basename "${VAR}")"
-	echo
-## Output file name
-	name=`echo "$file" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	echo "Output name ext : "$name""
-	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	echo "Output name bis : "$name1""
+	echo Selected file name: "$(basename "${VAR}")"
 	
 echo -------------------------========================-------------------------
-## Variables, for program."
-	part=0
-	debug=0
-echo "Get the last Folder :"
-	INPUT="$(dirname "${VAR}")"
-	echo ${INPUT##*/} 
-## The code program.
+	echo "Create m3u list, Mp3 in direct folder, with name"
+	echo "There are a problem if there are many ' . ' in the file name DO NO PUT . (dot) EVERYWHERE"
+	echo
+	echo "Temp File location:"
+	echo "/dev/shm/m3u.tmp"
+	echo
+	echo "Selected folder:"
+	echo "$way"
+	
+	find "$way" -type f -iname "*.mp3" > "/dev/shm/m3u.tmp"
 
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	error $?
+	## Need code to sort files in correct number order, not by date created.
+	echo
+	echo "Files are sorted from "/dev/shm/m3u.tmp" to "/dev/shm/m4u.tmp""
+	sort /dev/shm/m3u.tmp > /dev/shm/m4u.tmp
+	
+	echo
+	echo "Mp3 files found (Others format ignored):"
+	input1="/dev/shm/m4u.tmp"
+	while IFS= read -r line1
+	do
+	echo "$line1"
+	done < "$input1"
 
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	echo mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	echo mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	error $?
+	## work with bizzare empty var
+	## remove the path inside the file and needed an extra
+	## These 2 lines write actual mp3 find in the folder you specified.
+	new=
+	sed "s|$way/|$new|g" "/dev/shm/m4u.tmp" > "$way"/"$(basename "${VAR1}")".m3u""
+	
+	echo
+	echo "Final Playlist:"
+	input2="$way"/"$(basename "${VAR1}")".m3u""
+	while IFS= read -r line2
+	do
+	echo "$line2"
+	done < "$input2"
+	#sleep 1
+	
+	echo
+	echo "Final File location"
+	echo "$way"/"$(basename "${VAR1}")".m3u""
+
+## Error detector.
+if [ "$?" -ge 1 ]; then
+	echo "!!! ERROR was detected !!! Press ENTER key to terminate !!!"
+	echo
+	echo "${red}ERROR ███████████████████████████ ERROR █████████████████████████████ ERROR ${reset}"
+	read name
+	exit
+fi
 	
 echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.

@@ -1,8 +1,8 @@
 #!/bin/bash
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
-	#printf '\033[8;40;80t'		# will resize the window, if needed.
-	printf '\033[8;40;125t'		# will resize the window, if needed.
+	printf '\033[8;40;80t'		# will resize the window, if needed.
+	#printf '\033[8;40;100t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
 	sleep 0.50
 	
@@ -23,46 +23,29 @@ echo -------------------------========================-------------------------
 	part=0		# don't change this value
 
 echo -------------------------========================-------------------------
-
-	echo Version compiled on : Also serves as a version
-	echo 2022-02-18_Friday_02:15:25
 	echo
+	echo Version compiled on : Also serves as a version
+	echo 2022-02-03_Thursday_04:43:34
+echo -------------------------========================-------------------------
 ## Software name, what is this, version, informations.
-	echo "Software name: Creator Cover Folder Name"
-	echo "File name: Creator CoverFolderName.sh"
+	echo "Software name: extract SRTfromMKV_samefolder"
 	echo
 	echo What it does ?
-	echo "You specify ONE image file and this convert to THREE files."
+	echo "Extract subtitles from each MKV IDX SUB file in the given directory"
 	echo
-	echo "Read me for this file (and known bugs) :"
-	echo
-	echo "Create images files for music cover, album cover and movie poster."
-	echo
-	echo "Convert ONE image file to 1000 x 1000 px, poster.jpg"
-	echo "Convert ONE image file to 750 x 750 px, nameofthefolder.jpg"
-	echo "Convert ONE image file to 500 x 500 px, cover.jpg"
-	echo "Bash and imagemagick only"
-	echo
-	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft."
+	echo Informations :
+	echo "By LostByteSoft, no copyright or copyleft"
 	echo "https://github.com/LostByteSoft"
+	echo "https://askubuntu.com/questions/452268/extract-subtitle-from-mkv-files"
+	echo "Author: https://askubuntu.com/users/230052/nux"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 echo -------------------------========================-------------------------
 
-echo "Check installed requirements !"
-
-if command -v imagemagick >/dev/null 2>&1
-	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
-		echo -------------------------========================-------------------------
-		sleep 10
-		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
-fi
+echo You must put this file in the same directory of the file you want to extract !
+echo Be careful it will extract ALL video MKV file in the directory.
+echo Press ENTER to continue.
+read name
 
 echo -------------------------========================-------------------------
 echo Function Debug. Activate via source program debug=1.
@@ -101,69 +84,35 @@ echo Function Auto Quit. If autoquit=1 will automaticly quit.
 		fi
 
 echo -------------------------========================-------------------------
-echo "Select filename using dialog !"
 
-	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
-	## --file-filter="*.jpg *.gif"
-
-if test -z "$file"
-	then
-		echo "You don't have selected a file, now exit in 3 seconds."
-		echo -------------------------========================-------------------------
-		sleep 3
-		exit
-	else
-		echo "You have selected :"
-		echo "$file"
+# If no directory is given, work in local dir
+if [ "$1" = "" ]; then
+  DIR="."
+else
+  DIR="$1"
 fi
-echo -------------------------========================-------------------------
-echo "Input name, directory and output name : (Debug helper)"
-## Set working path.
-	dir=$(pwd)
-	echo "Working dir : "$dir""
-	echo Input file : "$file"
-	export VAR="$file"
-	echo
-	echo Base directory : "$(dirname "${VAR}")"
-	echo Base name: "$(basename "${VAR}")"
-	echo
-## Output file name
-	name=`echo "$file" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	echo "Output name ext : "$name""
-	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
-	echo "Output name bis : "$name1""
-	
-echo -------------------------========================-------------------------
-## Variables, for program."
-	part=0
-	debug=0
-echo "Get the last Folder :"
-	INPUT="$(dirname "${VAR}")"
-	echo ${INPUT##*/} 
-## The code program.
 
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	echo cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
-	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
-	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
-	error $?
+echo -----------------------------------------------------------------------------
 
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "Copy and convert files."
-	echo mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	echo mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	echo mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
-	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
-	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
-	error $?
+# Get all the MKV files in this dir and its subdirs
+find "$DIR" -type f -name '*.mkv' | while read filename
+do
+  # Find out which tracks contain the subtitles
+  mkvmerge -i "$filename" | grep 'subtitles' | while read subline
+  do
+    # Grep the number of the subtitle track
+    tracknumber=`echo $subline | egrep -o "[0-9]{1,2}" | head -1`
+
+    # Get base name for subtitle
+    subtitlename=${filename%.*}
+
+    # Extract the track to a .tmp file
+    `mkvextract tracks "$filename" $tracknumber:"$subtitlename.srt.tmp" > /dev/null 2>&1`
+    `chmod g+rw "$subtitlename.srt.tmp"`
+  done
+done
+
+error $?
 	
 echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
