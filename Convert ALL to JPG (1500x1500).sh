@@ -109,12 +109,20 @@ echo "Get the last Folder :"
 	INPUT="$(dirname "${VAR}")"
 	echo ${INPUT##*/} 
 ## The code program.
-	rm "/dev/shm/findfiles.txt"
+	rm "/dev/shm/findfiles.txt" 2> /dev/null
 
 ## find files
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 echo Finding files...
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo All lowercase for convert...
+	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
 
 	## Easy way to add a file format, copy paste a new line.
 	echo "Will find files in sub folders too...."

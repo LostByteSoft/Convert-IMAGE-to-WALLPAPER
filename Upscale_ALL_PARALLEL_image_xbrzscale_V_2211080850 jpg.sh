@@ -26,46 +26,50 @@ echo "Common variables, you can changes theses variables as you wish to test (0 
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
-	NOquit=0	# No quit after all operations.
+	NOquit=1	# No quit after all operations.
 
 	echo autoquit=$autoquit debug=$debug error=$error part=$part NOquit=$NOquit
 
 echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2022-11-08_Tuesday_09:04:25
+	echo 2022-11-08_Tuesday_08:50:40
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Convert ALL images to WEBP parallel"
-	echo "File name : Convert ALL to WEBP (parallel).sh"
+	echo "Software name: Upscale image(s)"
 	echo
-	echo "What it does ?  Convert ALL to WEBP image format with gnu parallel."
-	echo "Use folder select"
+	echo Example:
+	echo xbrzscale
+	echo usage: xbrzscale scale_factor input_image output_image
+	echo scale_factor can be between 2 and 6
 	echo
-	echo "Read me for this file (and known bugs) :"
+	echo Known bugs :
 	echo
-	echo "It's ok for image conversion to use double core value because the"
-	echo "time lost between open, close and save image on disk."
+	echo Images bigger than 10000x10000 create errors.
 	echo
-	echo "Cannot add new lettering or numbers to converted file."
+	echo Informations :
 	echo
-	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft all byte is lost."
+	echo JPEG is also defined with the additional extensions: jpg jpe jif jfif and jfi
+	echo
+	echo https://jaibeermalik.wordpress.com/2012/10/18/imagemagick-mogrify-vs-convert-which-one-to-use-and-when/
+	echo
+	echo "By LostByteSoft, no copyright or copyleft"
 	echo "https://github.com/LostByteSoft"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
-echo -------------------------========================-------------------------
-echo "Check installed requirements !"
 
-if command -v imagemagick >/dev/null 2>&1
+echo -------------------------========================-------------------------
+
+echo "Check installed requirements !"
+if command -v xbrzscale >/dev/null 2>&1
 	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
+		echo "xbrzscale installed continue."
+		dpkg -s xbrzscale | grep Version
+	else
+		echo "You don't have ' xbrzscale ' installed, now exit in 10 seconds."
+		echo "Add with : sudo apt-get install xbrzscale"
 		echo -------------------------========================-------------------------
 		sleep 10
 		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
 fi
 
 if command -v parallel >/dev/null 2>&1
@@ -135,42 +139,6 @@ echo Function Auto Quit. If autoquit=1 will automaticly quit.
 	fi
 
 echo -------------------------========================-------------------------
-echo "Number of jobs processed concurrently at the same time ? (Refer as parallel CPU cores)"
-	cpu=$(nproc)
-	defx=$(( cpu / 2 ))	## for audio files
-	defv=$(( cpu / 4 ))	## for video files
-	defi=$(( cpu * 2 ))	## for images files
-	defy=$(( cpu * 4 ))	## for images files
-	defz=$(( cpu * 8 ))	## for images files
-
-	### Put an # in front of entry to do an automatic choice.
-
-	#entry=$(zenity --scale --value="$(nproc)" --min-value="1" --max-value="$defz" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have "$cpu" total cores !\n\n\tDefault suggested value is "$defv" for video.\n\n\tDefault suggested value is "$defx" for audio.\n\n\tDefault suggested value is ("$(nproc)" xbrzscale) "$defi" for images.\n\n(1 to whatever core you want to use will work anyway !)")
-
-if test -z "$entry"
-	then
-		echo "Default value of "$(nproc)" (Safe value) will be used. Now continue."
-		entry=$(nproc)
-		echo "You have selected : $entry"
-		#sleep 3
-	else
-		echo "You have selected : $entry"
-fi
-
-
-
-if [ "$entry" -ge $defi ]; then
-	part=$((part+1))
-	echo
-	echo "${yellow}█████████████████████████████████ WARNING █████████████████████████████████${reset}"
-	echo
-	echo "!!! You have chosen a very high parallel work value, this may slow down the calculation rather than speed it up !!!"
-	echo
-	read -n 1 -s -r -p "Press any key to CONTINUE"
-	echo
-fi
-
-echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
 	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
@@ -203,6 +171,42 @@ fi
 	fi
 
 echo -------------------------========================-------------------------
+echo "Number of jobs processed concurrently at the same time ? (Refer as parallel CPU cores)"
+	cpu=$(nproc)
+	defx=$(( cpu / 2 ))	## for audio files
+	defv=$(( cpu / 4 ))	## for video files
+	defi=$(( cpu * 2 ))	## for images files
+	defy=$(( cpu * 4 ))	## for images files
+	defz=$(( cpu * 8 ))	## for images files
+
+	### Put an # in front of entry to do an automatic choice.
+
+	entry=$(zenity --scale --value="$(nproc)" --min-value="1" --max-value="32" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have "$cpu" total cores !\n\n\tDefault suggested value is "$defv" for video.\n\n\tDefault suggested value is "$defx" for audio.\n\n\tDefault suggested value is ("$(nproc)" xbrzscale) "$defi" for images.\n\n(1 to whatever core you want to use will work anyway !)")
+
+if test -z "$entry"
+	then
+		echo "Default value of "$(nproc)" (Safe value) will be used. Now continue."
+		entry=$(nproc)
+		echo "You have selected : $entry"
+		#sleep 3
+	else
+		echo "You have selected : $entry"
+fi
+
+
+
+if [ "$entry" -ge $defi ]; then
+	part=$((part+1))
+	echo
+	echo "${yellow}█████████████████████████████████ WARNING █████████████████████████████████${reset}"
+	echo
+	echo "!!! You have chosen a very high parallel work value, this may slow down the calculation rather than speed it up !!!"
+	echo
+	read -n 1 -s -r -p "Press any key to CONTINUE"
+	echo
+fi
+
+echo -------------------------========================-------------------------
 echo "Input name, directory and output name : (Debug helper)"
 ## Set working path.
 	dir=$(pwd)
@@ -222,205 +226,141 @@ echo "Input name, directory and output name : (Debug helper)"
 	echo "Output name ext : "$name""
 	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
 	echo "Output name bis : "$name1""
-	echo All lowercase for convert...
-	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
+	
 	debug $?
 	
 echo -------------------------========================-------------------------
-echo Gif finder...
-count=`ls -1 "$file"/*.gif 2>/dev/null | wc -l`
-	echo GIF files search and count is : $count
-	find $file -name '*.gif'  >> "/dev/shm/findgif.txt"
-	cat "/dev/shm/findgif.txt"
-	if [ $count != 0 ]
-	then
-	if zenity --question --text="Gif files detected, do you want to rename them to *.gif.gif ?"
-		then
-			echo Finding files...
-			echo
-			
-		{
-		input="/dev/shm/findgif.txt"
-		while IFS= read -r "line"
-		do
-		echo Output : "$line".gif
-		mv  "$line" "$line".gif
-		done < "$input"
-		}
-	error $?
-	fi
-	fi
-
-echo -------------------------========================-------------------------
 ## The code program.
-echo Remove temp files...
-	rm "/dev/shm/findfiles.txt" 2> /dev/null
+
+echo All lowercase for convert...
+	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
-echo "Finding files... (NOT used to convert, just for your eyes.)"
-	echo
-	## Easy way to add a file format, copy paste a new line.
-	echo "Will NOT find files in sub folders."
-	find "$file" -maxdepth 1 -name '*.png'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.jpg'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.bmp'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.tif'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.tiff'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.webp'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.avif'  >> "/dev/shm/findfiles.txt"
-	cat "/dev/shm/findfiles.txt"
-	echo	
-echo Finding finish, with file count :
-	echo
-	wc -l < "/dev/shm/findfiles.txt"
-	echo
-	count=`ls -1 "$file"/*.* 2>/dev/null | wc -l`
-	if [ $count != 0 ]
-	then 
-	echo Folder is NOT empty....
+echo "Numbers of xbrzscale scale_factor"
+	#entry2=$(zenity --scale --value="2" --min-value="2" --max-value="6" --title "Numbers of xbrzscale scale_factor" --text "Numbers of xbrzscale scale_factor, 2 (lower) to 6 (bigger).\n\n\tSuggested default to 2.")
+
+if test -z "$entry2"
+	then
+		echo "Default value of 2 will be used."
+		entry2=2
+		echo "You have selected : $entry2"
+		#sleep 3
 	else
-		echo
-		echo "${yellow}█████████████████████ NO DATA TO PROCESS █████████████████████${reset}"
-		echo
-		read -n 1 -s -r -p "Press any key to EXIT"
-		exit
-	fi
-	error $?
+		echo "You have selected : $entry2"
+fi
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
-	echo "File count !"
-	count=`ls -1 "$file"/*.jpeg 2>/dev/null | wc -l`
-	echo "JPEG count is : $count"
-	count=`ls -1 "$file"/*.bmp 2>/dev/null | wc -l`
-	echo "BMP count is : $count"
-	count=`ls -1 "$file"/*.tif 2>/dev/null | wc -l`
-	echo "TIF count is : $count"
-	count=`ls -1 "$file"/*.tiff 2>/dev/null | wc -l`
-	echo "TIFF count is : $count"
-	count=`ls -1 "$file"/*.jpg 2>/dev/null | wc -l`
-	echo "JPG count is : $count"
-	count=`ls -1 "$file"/*.webp 2>/dev/null | wc -l`
-	echo "WEBP count is : $count"
-	count=`ls -1 "$file"/*.gif 2>/dev/null | wc -l`
-	echo "GIF count is : $count (NOT converted)"
-	count=`ls -1 "$file"/*.png 2>/dev/null | wc -l`
-	echo "PNG count is : $count"
-	count=`ls -1 "$file"/*.avif 2>/dev/null | wc -l`
-	echo "AVIF count is : $count"
+	echo Delete /dev/shm/findparallel.txt
+	rm "/dev/shm/findparallel.txt" 2> /dev/null
+
+## find files
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+	echo Finding files...
+
+	## Easy way to add a file format, copy paste a new line.
+	echo "Will NOT find files in sub folders... Remove -maxdepth 1 to search subfolders."
+	find "$file" -maxdepth 1 -iname '*.png'  >> "/dev/shm/findparallel.txt"
+	find "$file" -maxdepth 1 -iname '*.jpg'  >> "/dev/shm/findparallel.txt"
+	find "$file" -maxdepth 1 -iname '*.jpg_large'  >> "/dev/shm/findparallel.txt"
+	find "$file" -maxdepth 1 -iname '*.jpeg'  >> "/dev/shm/findparallel.txt"
+	find "$file" -maxdepth 1 -iname '*.bmp'  >> "/dev/shm/findparallel.txt"
+	find "$file" -maxdepth 1 -iname '*.gif'  >> "/dev/shm/findparallel.txt"		#UpScale of animated is not supported.
+	find "$file" -maxdepth 1 -iname '*.tif'  >> "/dev/shm/findparallel.txt"
+	find "$file" -maxdepth 1 -iname '*.tiff'  >> "/dev/shm/findparallel.txt"
+	find "$file" -maxdepth 1 -iname '*.webp'  >> "/dev/shm/findparallel.txt"	#UpScale of animated is not supported.
+	find "$file" -maxdepth 1 -iname '*.avif'  >> "/dev/shm/findparallel.txt"
+	
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+	echo List files...
+	cat "/dev/shm/findparallel.txt"
+	#echo "Continue in 3 seconds..."
+	#sleep 3
+	
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+	echo Finding finish, with file count :
+	wc -l < "/dev/shm/findparallel.txt"
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 
-	echo Conversion started
-	echo Complex convert multiples file at a time.
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.jpeg 2>/dev/null | wc -l`
-	echo JPEG conversion and count is : $count
-	if [ $count != 0 ]
+	echo UpScale, Conversion started...
+	echo Complex convertion multiples files "($entry)" at a time.
+
+	#echo parallel -a "/dev/shm/findparallel.txt" -j $entry xbrzscale $entry2 {} {}_UpScale.webp
+	#parallel -a "/dev/shm/findparallel.txt" -j $entry xbrzscale $entry2 {} {}_UpScale.webp
+	echo parallel -a "/dev/shm/findparallel.txt" -j $entry xbrzscale $entry2 {} {}_UpScale.jpg
+	parallel -a "/dev/shm/findparallel.txt" -j $entry xbrzscale $entry2 {} {}_UpScale.jpg
+	echo UpScale finish...
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+
+	echo "Reconvert (Yes or No (Suggest Yes))"
+	if zenity --question --text="Do you want to reconvert to save space ? (Yes or No (Suggest Yes))"
 	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.jpeg
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+			echo Convert to jpg / webp, parallel REconversion.
+			rm "/dev/shm/findparallel.txt"
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+			echo Find UpScaled files...
+			echo "find "$file" -maxdepth 1 -iname 'UpScale'  >> "/dev/shm/findparallel.txt""
+			##find "$file" -maxdepth 1 -iname '*UpScale.(images)'  >> "/dev/shm/findparallel.txt"	## webp
+			find "$file" -maxdepth 1 -iname '*UpScale.jpg'  >> "/dev/shm/findparallel.txt"	## jpg
+		
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"	
+			echo List UpScaled files...
+			cat "/dev/shm/findparallel.txt"
+		
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+			echo File count :
+			wc -l < "/dev/shm/findparallel.txt"
+		
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+			echo Convert started...
+			echo "Parallel jobs for images converting : $defi"
+			echo "Defined by core of the processor * 2"
+			echo
+			#parallel -a "/dev/shm/findparallel.txt" -j $defz mogrify -verbose -depth 32 -define webp:near-lossless=90 -format webp	## webp lossy
+			#parallel -a "/dev/shm/findparallel.txt" -j $defi mogrify -verbose -depth 32 -format webp	## webp
+			parallel -a "/dev/shm/findparallel.txt" -j $defi mogrify -verbose -format jpg -quality 95	## jpg
+			error $?
+			echo Conversion finish...
+
+	else
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+			echo "Not reconverted."
 	fi
 	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.bmp 2>/dev/null | wc -l`
-	echo BMP conversion and count is : $count
-	if [ $count != 0 ]
-	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.bmp
-	fi
-	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.tif 2>/dev/null | wc -l`
-	echo TIF conversion and count is : $count
-	if [ $count != 0 ]
-	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.tif
-	fi
-	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.tiff 2>/dev/null | wc -l`
-	echo TIFF conversion and count is : $count
-	if [ $count != 0 ]
-	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.tiff
-	fi
-	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.jpg 2>/dev/null | wc -l`
-	echo JPG conversion and count is : $count
-	if [ $count != 0 ]
-	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.jpg
-	fi
-	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.webp 2>/dev/null | wc -l`
-	echo WEBP conversion and count is : $count
-	if [ $count != 0 ]
-	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.webp
-	fi
-	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.gif 2>/dev/null | wc -l`
-	echo GIF conversion and count is : $count
-	#if [ $count != 0 ]
-	#then
-	#parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.gif
-	#fi
-	echo "(NOT converted)"
-	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.png 2>/dev/null | wc -l`
-	echo PNG conversion and count is : $count
-	if [ $count != 0 ]
-	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.png
-	fi
-	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.avif 2>/dev/null | wc -l`
-	echo AVIF conversion and count is : $count
-	if [ $count != 0 ]
-	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.avif
-	fi
-	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	error $?
-echo Conversion finish...
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 echo Move files to new folder?
 	
-	if zenity --question --text="Do you want to move files to ""$file"/jpg50" ? (Yes or No))"
+	if zenity --question --text="Do you want to move files to $file/UpScale ? (Yes or No))"
 	then
 		part=$((part+1))
 		echo "-------------------------===== Section $part =====-------------------------"
 		echo Create folder...
-			mkdir -p ""$file"/jpg50"
-			echo Move files...
-			echo ""$file"/'*.webp'" ""$file"/jpg50"
-			mv ""$file"/"*.webp"" ""$file"/jpg50"
+		mkdir -p "$file"/UpScale
+		echo Move files...
+		echo "$file"/*_UpScale* "$file"/UpScale
+		mv "$file"/*_UpScale* "$file"/UpScale
+		[ -f ""$file"/*gif*" ] && cp "$file"/*gif* "$file"/UpScale 2> /dev/null
 	else
 		part=$((part+1))
 		echo "-------------------------===== Section $part =====-------------------------"
-		echo "Files not moved."	
+			echo "Files not moved."	
 	fi
 	error $?
 

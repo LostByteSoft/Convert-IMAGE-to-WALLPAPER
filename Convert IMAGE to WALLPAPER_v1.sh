@@ -114,6 +114,14 @@ echo -------------------------========================-------------------------
 ## Variables, for program.
 	part=0
 
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo All lowercase for convert...
+	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+
 echo "Code start"
 
 	# 4096 × 2160 4k

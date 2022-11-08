@@ -115,6 +115,14 @@ echo "Input name, directory and output name : (Debug helper)"
 echo -------------------------========================-------------------------
 ## Variables, for program.
 	part=0
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo All lowercase for convert...
+	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
 	
 	if zenity --question --text="Convert only your screen resulution ?"
 	then

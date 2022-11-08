@@ -1,14 +1,15 @@
 #!/bin/bash
 #!/usr/bin/ffmpeg
 ## -----===== Start of bash =====-----
-	#printf '\033[8;30;80t'		# will resize the window, if needed.
 	#printf '\033[8;40;80t'		# will resize the window, if needed.
-	printf '\033[8;40;100t'	# will resize the window, if needed.
+	#printf '\033[8;40;125t'	# will resize the window, if needed.
+	printf '\033[8;40;150t'		# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
-	sleep 1
+	sleep 0.50
 	
 echo -------------------------========================-------------------------
-## Software lead-in
+echo "Software lead-in."
+
 	start=$SECONDS
 	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
 	echo "Current time : $now"
@@ -17,19 +18,25 @@ echo -------------------------========================-------------------------
 	yellow=`tput setaf 11`
 	blue=`tput setaf 12`
 	reset=`tput sgr0`
-## COmmon variables, you can changes theses variables as you wish to test (0 or 1)
-	autoquit=1	# autoquit anyway to script takes more than 2 min to complete
+
+echo -------------------------========================-------------------------
+echo "Common variables, you can changes theses variables as you wish to test (0 or 1)."
+
+	autoquit=0	# autoquit anyway to script takes more than 2 min to complete
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
+	NOquit=0	# No quit after all operations.
+
+	echo autoquit=$autoquit debug=$debug error=$error part=$part NOquit=$NOquit
 
 echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2022-02-22_Tuesday_07:11:00
+	echo 2022-11-08_Tuesday_09:04:25
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Convert ALL images to WEBP parallel"
-	echo "File name : Convert ALL to WEBP (parallel).sh"
+	echo "Software name: Convert ALL images to WEBP +50 parallel"
+	echo "File name : Convert ALL to WEBP +50 (parallel).sh"
 	echo
 	echo "What it does ?  Convert ALL to WEBP image format with gnu parallel."
 	echo "Use folder select"
@@ -46,44 +53,6 @@ echo -------------------------========================-------------------------
 	echo "https://github.com/LostByteSoft"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
-echo -------------------------========================-------------------------
-echo Function Debug. Activate via source program debug=1.
-	debug()
-	if [ "$debug" -eq 1 ]; then
-		echo
-		echo "${yellow}██████████████████████████████ DEBUG SLEEP ███████████████████████████████${reset}"
-		echo
-		echo debug = $debug
-		echo part = $part
-		echo INPUT = $INPUT
-		echo {INPUT##*/}  = ${INPUT##*/} 
-		echo input = $input
-		echo cpu = $cpu
-		echo defv = $defv
-		echo defa = $defa
-		echo defi = $defi
-		echo entry = $entry
-		echo autoquit = $autoquit
-		echo 
-		read -n 1 -s -r -p "Press any key to EXIT"
-		exit
-	fi
-
-echo Function Error detector. If errorlevel is 1 or greater will show error msg.
-	error()
-	{
-	if [ "$?" -ge 1 ]; then
-		part=$((part+1))
-		echo
-		echo "${red}█████████████████████████████████ ERROR $part █████████████████████████████████${reset}"
-		echo
-		echo "!!! ERROR was detected !!! Press ANY key to try to CONTINUE !!! Will probably exit !!!"
-		echo
-		read -n 1 -s -r -p "Press any key to CONTINUE"
-		echo
-	fi
-	}
-
 echo -------------------------========================-------------------------
 echo "Check installed requirements !"
 
@@ -112,32 +81,93 @@ if command -v parallel >/dev/null 2>&1
 fi
 
 echo -------------------------========================-------------------------
-echo "Numbers of parallel multi-cores to use ?"
-	cpu=$(nproc)
-	defv=$(( cpu / 4 ))	## for video files
-	defa=$(nproc)		## for audio files
-	defi=$(( cpu * 2 ))	## for images files
-	#echo cpu = $cpu
-	#echo defv = $defv
-	#echo defa = $defa
-	#echo defi = $defi
-	if [ "$defv" -eq "0" ]
-	then
-	#echo defv = $defv
-	defv=1
-	#echo defv = $defv
+echo Function Debug. Activate via source program debug=1.
+
+debug()
+	if [ "$debug" -ge 1 ]; then
+		echo
+		echo "${yellow}█████████████████████████████████ DEBUG ██████████████████████████████████${reset}"
+		echo
+		echo debug = $debug 	part = $part 	autoquit = $autoquit file = $file
+		echo
+		echo entry = $entry	entry2 = $entry2 	
+		echo
+		echo file = $file
+		echo
+		echo cpu = $cpu
+		echo defv = $defv
+		echo defs = $defx
+		echo defa = $defa
+		echo defi = $defi
+		echo defz = $defz
+		echo 
+		read -n 1 -s -r -p "Press any key to continue"
+		echo
+		#exit
 	fi
-	#entry=$(zenity --scale --value="$defi" --min-value="1" --max-value="32" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have "$cpu" total cores !\n\n\tDefault suggested value is "$defv" for video.\n\n\tDefault suggested value is "$defa" for audio.\n\n\tDefault suggested value is "$defi" for images.\n\n(1 to whatever core you want to use will work anyway !)")
+	
+		if [ "$debug" -eq "1" ]; then
+		echo
+		echo "${yellow}██████████████████████████████ DEBUG ACTIVATED ███████████████████████████${reset}"
+		echo
+		echo Continue in 1 seconds...
+		sleep 1
+	fi
+
+echo Function Error detector. If errorlevel is 1 or greater will show error msg.
+error()
+	if [ "$?" -ge 1 ]; then
+		part=$((part+1))
+		echo
+		echo "${red}█████████████████████████████████ ERROR $part █████████████████████████████████${reset}"
+		echo
+		echo "!!! ERROR was detected !!! Press ANY key to try to CONTINUE !!! Will probably exit !!!"
+		echo
+		read -n 1 -s -r -p "Press any key to CONTINUE"
+		echo
+	fi
+
+echo Function Auto Quit. If autoquit=1 will automaticly quit.
+	if [ "$autoquit" -eq "1" ]; then
+		echo
+		echo "${blue}████████████████████████████ AUTO QUIT ACTIVATED █████████████████████████${reset}"
+		echo
+	fi
+
+echo -------------------------========================-------------------------
+echo "Number of jobs processed concurrently at the same time ? (Refer as parallel CPU cores)"
+	cpu=$(nproc)
+	defx=$(( cpu / 2 ))	## for audio files
+	defv=$(( cpu / 4 ))	## for video files
+	defi=$(( cpu * 2 ))	## for images files
+	defy=$(( cpu * 4 ))	## for images files
+	defz=$(( cpu * 8 ))	## for images files
+
+	### Put an # in front of entry to do an automatic choice.
+
+	#entry=$(zenity --scale --value="$(nproc)" --min-value="1" --max-value="32" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have "$cpu" total cores !\n\n\tDefault suggested value is "$defv" for video.\n\n\tDefault suggested value is "$defx" for audio.\n\n\tDefault suggested value is ("$(nproc)" xbrzscale) "$defi" for images.\n\n(1 to whatever core you want to use will work anyway !)")
 
 if test -z "$entry"
 	then
-		entry=8
-		echo "Default value of $entry will be used. Now continue in 3 seconds."
-		#entry=$(nproc)
+		echo "Default value of "$(nproc)" (Safe value) will be used. Now continue."
+		entry=$(nproc)
 		echo "You have selected : $entry"
 		#sleep 3
 	else
 		echo "You have selected : $entry"
+fi
+
+
+
+if [ "$entry" -ge $defi ]; then
+	part=$((part+1))
+	echo
+	echo "${yellow}█████████████████████████████████ WARNING █████████████████████████████████${reset}"
+	echo
+	echo "!!! You have chosen a very high parallel work value, this may slow down the calculation rather than speed it up !!!"
+	echo
+	read -n 1 -s -r -p "Press any key to CONTINUE"
+	echo
 fi
 
 echo -------------------------========================-------------------------
@@ -145,7 +175,7 @@ echo "Select filename using dialog !"
 
 	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
 	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
-	#file="/home/"$USER"/Downloads"
+	#file="/$HOME/Downloads"
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -158,6 +188,20 @@ if test -z "$file"
 		echo "You have selected :"
 		echo "$file"
 fi
+
+	count=`ls -1 "$file"/*.* 2>/dev/null | wc -l`
+	echo Count : $count
+	if [ $count != 0 ]
+	then 
+	echo Folder is NOT empty....
+	else
+		echo
+		echo "${yellow}█████████████████████ NO DATA TO PROCESS █████████████████████${reset}"
+		echo
+		read -n 1 -s -r -p "Press any key to EXIT"
+		exit
+	fi
+
 echo -------------------------========================-------------------------
 echo "Input name, directory and output name : (Debug helper)"
 ## Set working path.
@@ -179,17 +223,48 @@ echo "Input name, directory and output name : (Debug helper)"
 	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
 	echo "Output name bis : "$name1""
 	
+	echo All lowercase for convert...
+	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
+	debug $?
+	
+echo -------------------------========================-------------------------
+echo Gif finder...
+count=`ls -1 "$file"/*.gif 2>/dev/null | wc -l`
+	echo GIF files search and count is : $count
+	find $file -name '*.gif'  >> "/dev/shm/findgif.txt"
+	cat "/dev/shm/findgif.txt"
+	if [ $count != 0 ]
+	then
+	if zenity --question --text="Gif files detected, do you want to rename them to *.gif.gif ?"
+		then
+			echo Finding files...
+			echo
+			
+		{
+		input="/dev/shm/findgif.txt"
+		while IFS= read -r "line"
+		do
+		echo Output : "$line".gif
+		mv  "$line" "$line".gif
+		done < "$input"
+		}
+	error $?
+	fi
+	fi
+
 echo -------------------------========================-------------------------
 ## The code program.
-	rm "/dev/shm/findfiles.txt"
+echo Remove temp files...
+	rm "/dev/shm/findfiles.txt" 2> /dev/null
+	rm "/dev/shm/findgif.txt" 2> /dev/null
 
-## find files
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 echo "Finding files... (NOT used to convert, just for your eyes.)"
 	echo
 	## Easy way to add a file format, copy paste a new line.
 	echo "Will NOT find files in sub folders."
+	echo
 	find "$file" -maxdepth 1 -name '*.png'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.jpg'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
@@ -199,6 +274,7 @@ echo "Finding files... (NOT used to convert, just for your eyes.)"
 	find "$file" -maxdepth 1 -name '*.tiff'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.webp'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.avif'  >> "/dev/shm/findfiles.txt"
+	echo
 	cat "/dev/shm/findfiles.txt"
 	echo	
 echo Finding finish, with file count :
@@ -206,6 +282,7 @@ echo Finding finish, with file count :
 	wc -l < "/dev/shm/findfiles.txt"
 	echo
 	count=`ls -1 "$file"/*.* 2>/dev/null | wc -l`
+	#echo Count : $count
 	if [ $count != 0 ]
 	then 
 	echo Folder is NOT empty....
@@ -221,24 +298,28 @@ echo Finding finish, with file count :
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 	echo "File count !"
+	echo
+	#count=`ls -1 "$file"/*.* 2>/dev/null | wc -l`
+	echo Total Count : $count
 	count=`ls -1 "$file"/*.jpeg 2>/dev/null | wc -l`
-	echo JPEG count is : $count
+	echo "JPEG count is : $count"
 	count=`ls -1 "$file"/*.bmp 2>/dev/null | wc -l`
-	echo BMP count is : $count
+	echo "BMP count is : $count"
 	count=`ls -1 "$file"/*.tif 2>/dev/null | wc -l`
-	echo TIF count is : $count
+	echo "TIF count is : $count"
 	count=`ls -1 "$file"/*.tiff 2>/dev/null | wc -l`
-	echo TIFF count is : $count
+	echo "TIFF count is : $count"
 	count=`ls -1 "$file"/*.jpg 2>/dev/null | wc -l`
-	echo JPG count is : $count
+	echo "JPG count is : $count"
 	count=`ls -1 "$file"/*.webp 2>/dev/null | wc -l`
-	echo "WEBP count is : $count (NOT converted)"
+	echo "WEBP count is : $count"
 	count=`ls -1 "$file"/*.gif 2>/dev/null | wc -l`
-	echo GIF count is : $count
+	echo "GIF count is : $count"
 	count=`ls -1 "$file"/*.png 2>/dev/null | wc -l`
-	echo PNG count is : $count
+	echo "PNG count is : $count"
 	count=`ls -1 "$file"/*.avif 2>/dev/null | wc -l`
-	echo AVIF count is : $count
+	echo "AVIF count is : $count"
+	sleep 2
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
@@ -247,11 +328,20 @@ echo "-------------------------===== Section $part =====------------------------
 	echo Complex convert multiples file at a time.
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
+	count=`ls -1 "$file"/*.webp 2>/dev/null | wc -l`
+	echo WEBP conversion and count is : $count
+	if [ $count != 0 ]
+	then
+	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.webp
+	fi
+	error $?
+	part=$((part+1))
+	echo "-------------------------===== Section $part =====-------------------------"
 	count=`ls -1 "$file"/*.jpeg 2>/dev/null | wc -l`
 	echo JPEG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.jpeg
+	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.jpeg
 	fi
 	error $?
 	part=$((part+1))
@@ -260,7 +350,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo BMP conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.bmp
+	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.bmp
 	fi
 	error $?
 	part=$((part+1))
@@ -269,7 +359,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.tif
+	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.tif
 	fi
 	error $?
 	part=$((part+1))
@@ -278,7 +368,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIFF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.tiff
+	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.tiff
 	fi
 	error $?
 	part=$((part+1))
@@ -287,18 +377,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.jpg
-	fi
-	error $?
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	count=`ls -1 "$file"/*.webp 2>/dev/null | wc -l`
-	echo WEBP conversion and count is : $count
-	if [ $count != 0 ]
-	then
-	echo "No webp conversion."
-	#parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.webp
-	echo NO webp conversion.
+	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.jpg
 	fi
 	error $?
 	part=$((part+1))
@@ -307,7 +386,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo GIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.gif
+	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.gif
 	fi
 	error $?
 	part=$((part+1))
@@ -316,22 +395,41 @@ echo "-------------------------===== Section $part =====------------------------
 	echo PNG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.png
+	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.png
 	fi
 	error $?
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-		count=`ls -1 "$file"/*.avif 2>/dev/null | wc -l`
+	count=`ls -1 "$file"/*.avif 2>/dev/null | wc -l`
 	echo AVIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.avif
+	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.avif
 	fi
 	error $?
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-
+	error $?
 echo Conversion finish...
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo Move files to new folder?
+	
+	if zenity --question --text="Do you want to move files to ""$file"/webp50" ? (Yes or No))"
+	then
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		echo Create folder...
+			mkdir -p ""$file"/webp50"
+			echo Move files...
+			echo ""$file"/'*.webp'" ""$file"/webp50"
+			mv ""$file"/"*.webp"" ""$file"/webp50"
+	else
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		echo "Files not moved."	
+	fi
 	error $?
 
 echo -------------------------========================-------------------------
@@ -342,66 +440,84 @@ echo -------------------------========================-------------------------
 	echo "Time needed: $date"
 	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
 	echo "Current time : $now"
-	echo
+
+echo -------------------------========================-------------------------
 ## Press enter or auto-quit here.
-	echo "${yellow}If a script takes MORE than 120 seconds to complete it will ask you to take action !${reset}"
-	echo "Press ENTER to terminate."
+	echo "If a script takes MORE than 120 seconds to complete it will ask"
+	echo "you to press ENTER to terminate."
 	echo
-	echo "${green}If a script takes LESS than 120 seconds to complete it will auto-terminate !${reset}"
-	echo "Auto-terminate after 10 seconds"
+	echo "If a script takes LESS than 120 seconds to complete it will auto"
+	echo "terminate after 10 seconds"
 	echo
 
 echo -------------------------========================-------------------------
 ## Exit, wait or auto-quit.
+	echo
+	echo Processing file or folder of "$name1" finish !
+	echo
 	debug $?
+
+if [ "$NOquit" -eq "1" ]
+	then
+	echo "${green}████████████████████████████████ NO exit activated ██████████████████████████████████${reset}"
+	read -n 1 -s -r -p "Press ENTER key to exit !"
+	exit
+	fi
 
 if [ "$autoquit" -eq "1" ]
 then
-	echo "${blue}██████████████████████████████ Finish Now ████████████████████████████████${blue}"
+		echo "Script will auto quit in 1 seconds."
+		echo
+		echo "${blue}██████████████████████████████ Finish Now ████████████████████████████████${reset}"
+		echo
 		sleep 1
-		exit
 	else
-		{
+	{
 	if [ $(( SECONDS - start )) -gt 120 ]
 		then
 			echo "Script takes more than 120 seconds to complete."
-			echo "Press ENTER key to exit !"
 			echo
 			echo "${yellow}████████████████████████████████ Finish ██████████████████████████████████${reset}"
-			read name
-			exit
+			echo
+			echo -------------------------========================-------------------------
+			read -n 1 -s -r -p "Press ENTER key to exit !"
 		else
 			echo "Script takes less than 120 seconds to complete."
-			echo "Auto-quit in 10 sec. (You can press X)"
 			echo
 			echo "${green}████████████████████████████████ Finish ██████████████████████████████████${reset}"
-			sleep 9
-			exit
+			echo
+			echo -------------------------========================-------------------------
+			echo "Auto-quit in 10 sec. (You can press X)"
+			sleep 10
 		fi
 	}
-fi
-	sleep 1
+	fi
+
 	exit
 
 ## -----===== End of bash =====-----
 
-End-user license agreement (eula)
-	JUST DO WHAT YOU WANT WITH THE PUBLIC LICENSE
-	
-	Version 3.1415926532 (January 2022)
-	
-	TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-   	
-   	Everyone is permitted to copy and distribute verbatim or modified copies of
-	this license document.
-	
-	As is customary and in compliance with current global and interplanetary
-	regulations, the author of these pages disclaims all liability for the
-	consequences of the advice given here, in particular in the event of partial
-	or total destruction of the material, Loss of rights to the manufacturer
-	warranty, electrocution, drowning, divorce, civil war, the effects of radiation
-	due to atomic fission, unexpected tax recalls or encounters with
-	extraterrestrial beings elsewhere.
-	
-	LostByteSoft no copyright or copyleft we are in the center.
+	End-user license agreement (eula)
+
+ 	JUST DO WHAT THE F*** YOU WANT WITH THE PUBLIC LICENSE
+ 	
+ 	Version 3.1415926532 (January 2022)
+ 	
+ 	TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+    	
+	Everyone is permitted to copy and distribute verbatim or modified copies of
+ 	this license document.
+ 	
+ 	As is customary and in compliance with current global and interplanetary
+ 	regulations, the author of these pages disclaims all liability for the
+ 	consequences of the advice given here, in particular in the event of partial
+ 	or total destruction of the material, Loss of rights to the manufacturer
+ 	warranty, electrocution, drowning, divorce, civil war, the effects of radiation
+ 	due to atomic fission, unexpected tax recalls or encounters with
+ 	extraterrestrial beings elsewhere.
+ 	
+ 	YOU MUST ACCEPT THESES TERMS OR NOTHING WILL HAPPEN.
+ 	
+ 	LostByteSoft no copyright or copyleft we are in the center.
+
 ## -----===== End of file =====-----

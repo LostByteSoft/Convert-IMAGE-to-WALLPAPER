@@ -164,6 +164,14 @@ echo -------------------------========================-------------------------
 	part=0
 	debug=1
 	rm "/dev/shm/findfiles.txt"
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo All lowercase for convert...
+	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
 	
 	## Working examples
 	#convert "$line" -resize 640x480^ -gravity center -crop 640x480+0+0 +repage "$line"-para-640x480.jpg
