@@ -22,10 +22,10 @@ echo -------------------------========================-------------------------
 	echo 2022-02-20_Sunday_12:22:54
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Convert ALL images to WEBP"
-	echo "File name : Convert ALL to WEBP.sh"
+	echo "Software name: Convert ALL to JPG 1500px"
+	echo "File name : Convert ALL to JPG (2000x2000).sh"
 	echo
-	echo "What it does ?  Convert ALL to WEBP image format."
+	echo "What it does ?  Convert ALL to JPG image format."
 	echo "Use folder select"
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
@@ -111,6 +111,11 @@ echo "Get the last Folder :"
 ## The code program.
 	rm "/dev/shm/findfiles.txt" 2> /dev/null
 
+## find files
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo Finding files...
+
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 echo All lowercase for convert...
@@ -119,23 +124,18 @@ echo All lowercase for convert...
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 
-## find files
-part=$((part+1))
-echo "-------------------------===== Section $part =====-------------------------"
-echo Finding files...
-
 	## Easy way to add a file format, copy paste a new line.
-	echo "Will find files in sub folders too...."
-	find $file -name '*.png'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.bmp'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.avif'  >> "/dev/shm/findfiles.txt"
-	#find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
+	echo "Will NOT find files in sub folders."
+	find "$file" -maxdepth 1 -name '*.avif'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.bmp'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.gif'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.jpg'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.jpg_large'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.png'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.tif'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.tiff'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.webp'  >> "/dev/shm/findfiles.txt"
 	cat "/dev/shm/findfiles.txt"
 	echo	
 echo Finding finish, with file count :
@@ -151,8 +151,8 @@ echo "-------------------------===== Section $part =====------------------------
 	input="/dev/shm/findfiles.txt"
 		while IFS= read -r "line"
 		do
-		echo "$line"_convert.webp
-		convert "$line" -verbose -define webp:lossless=true -format webp "$line"_convert.webp
+		echo "$line"_convert.jpg
+		convert "$line" -format jpg -resize 2000x2000 "$line"_convert.jpg
 		done < "$input"
 	}
 	error $?

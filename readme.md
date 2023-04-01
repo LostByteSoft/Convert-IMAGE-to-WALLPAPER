@@ -1,6 +1,14 @@
-LostByteSoft ; Convert IMAGE to WALLPAPER
+LostByteSoft ; Convert : Images Wallpaper jpg webp gif
 
-Convert images for wallpaper for different resolutions.
+-Convert all to jpg/webp.
+
+-Convert to 2000x2000 jpg/webp.
+
+-Slowdown a gif.
+
+-Determine if folder contain animated webp.
+
+-Convert images for wallpaper for different resolutions.
 
 
 Features:
@@ -10,8 +18,7 @@ Convert IMAGE to WALLPAPER_v2 the V 2 is the version to use.
 
 	Tested on : ImageMagick 6.9.11-60 Q16 x86_64
 	
-	Need GNU parallel to work.
-	No more black bar.
+	Convert IMAGE to WALLPAPER_v3_(parallel).sh Need GNU parallel to work.
 	
 	!!! Convert IMAGE to WALLPAPER_v2.sh is the best to use. !!!
 	
@@ -45,7 +52,8 @@ Convert image to wallpaper:
 		-You select one file and convert to multiples resolutions.
 		-Convert only to your screen resolution.
 		-Convert to any resolution to fill (or remove) all the black bars.
-		
+	
+	NEED GNU_PARALLEL	
 	Convert IMAGE to WALLPAPER_v3 (parallel).sh
 		-Convert the selected folder AND sub folder.
 		-Use parallel to faster convert.
@@ -54,7 +62,7 @@ Convert image to wallpaper:
 Convert ALL files:
 ---------------------------------------------
 
-	Convert ALL to JPG (1500x1500).sh
+	Convert ALL to JPG (2000x2000).sh
 		Convert images files in folder to JPG format + 1500px.
 
 	Convert ALL to PNG.sh
@@ -63,7 +71,7 @@ Convert ALL files:
 	Convert ALL to WEBP.sh
 		Convert images files in folder to WEBP format.
 	
-	Convert ALL to WEBP (1500x1500).sh
+	Convert ALL to WEBP (2000x2000).sh
 		Convert images files in folder to WEBP format + 1500px.
 
 	Convert ALL to WEBP (parallel).sh
@@ -79,7 +87,7 @@ Convert ONE files:
 	Convert to WEBP.sh
 		Convert one images file to WEBP format.
 
-Others files:
+Music and movies tool.
 ---------------------------------------------
 
 	Creator CoverFolderName.sh
@@ -88,6 +96,17 @@ Others files:
 		Convert ONE image file to 750 x 750 px, nameofthefolder.jpg
 		Convert ONE image file to 500 x 500 px, cover.jpg
 
+	Creator playlist all music select.sh
+		Create an m3u for folder and subfolders
+
+Others files:
+---------------------------------------------
+
+	Rename gif to 000_oldname
+		Rename a file with 000_ in front
+	
+	SlowDown_OneFile_Gif_V202303301808
+		Slow down the gif you specified
 
 ---------------------------------------------
 

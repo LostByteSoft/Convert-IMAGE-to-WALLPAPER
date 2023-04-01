@@ -38,37 +38,28 @@ echo -------------------------========================-------------------------
 	echo
 echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2023-01-15_Sunday_10:39:19
+	echo 2022-12-16_Friday_08:10:17
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Wallpaper creator V3 (parallel)"
-	echo "File name : Convert IMAGE to WALLPAPER_v3_(parallel).sh"
+	echo "Software name: Creator playlist all music"
+	echo "File name : Creator playlist all music select.sh"
+	echo
 	echo What it does ?
-	echo "You specify ONE directory and this convert to all"
-	echo "resolution conversion in parallel."
+	echo "Auto create m3u playlist for folders (with autoname)"
+	echo
+	echo "Will create an m3u file in the folder you selected."
+	echo "All audio files in sub folders are find and put in file"
+	echo "Take the name of previous folder for *.m3u name"
+	echo "Will create an *.m3u file for group of *.mp3 in THE DIRECT FOLDER"
+	echo "Will do not create for folders or sub folders."
+	echo
 	echo Informations :
 	echo "By LostByteSoft, no copyright or copyleft"
 	echo "https://github.com/LostByteSoft"
-	echo
-	echo Tested on : ImageMagick 6.9.11-60 Q16 x86_64
-	echo
-	echo sudo gedit /etc/ImageMagick-6/policy.xml
-	echo convert -list resource
-	echo ImgMack policy are SO LOW you need to change them to something usable
-	echo ex: mem 12GiB , disk 64GiB
-	echo
-	echo Need GNU parallel to work.
-	echo
-	echo "!!! Convert IMAGE to WALLPAPER_v2.sh is the best to use. !!!"
-	echo
-	echo This software DOES NOT SUPPORT spaces in names ...
-	echo No more black bar.
-	echo "Create centered image"
-	echo "Create RESOLUTION images files for wallpaper"
-	echo
-	echo "Bash, imagemagick and parallel are used."
+	echo "Version 2021-12-14 Original release"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
+
 echo -------------------------========================-------------------------
 echo Function ${blue}█████${reset} Debug. Activate via source program debug=1.
 
@@ -120,49 +111,6 @@ echo Function ${green}█████${reset} Auto Quit. If autoquit=1 will auto
 	fi
 	echo
 echo -------------------------========================-------------------------
-echo "Check installed requirements !"
-
-if command -v imagemagick >/dev/null 2>&1
-	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
-		echo -------------------------========================-------------------------
-		sleep 10
-		exit
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
-fi
-
-if command -v parallel >/dev/null 2>&1
-	then
-		echo "Parallel installed continue."
-		dpkg -s parallel | grep Version
-	else
-		echo "You don't have ' parallel ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install parallel"
-		echo -------------------------========================-------------------------
-		sleep 10
-		exit
-fi
-
-echo -------------------------========================-------------------------
-echo "Enter cores to use ?"
-	cpu=$(nproc)
-	def=$(( cpu / 2 ))
-	#entry=$(zenity --scale --value="$def" --min-value="1" --max-value="$cpu" --title "Convert files with Multi Cores Cpu" --text "How many cores do you want to use ? You have $cpu cores !\n\nDefault value is $def, it is suggested you only use real cores.\n\n(1 to whatever core you want to use)")
-
-if test -z "$entry"
-	then
-		echo "Default value of $cpu / 2 will be used. Now continue in 3 seconds."
-		entry=$cpu
-		echo "You have selected : $entry"
-		#sleep 3
-	else
-		echo "You have selected : $entry"
-fi
-
-echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
 	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
@@ -178,15 +126,22 @@ if test -z "$file"
 	else
 		echo "You have selected :"
 		echo "$file"
-fi
+	fi
+
+	rm "$file"/VideoClips.m3u 2> /dev/null
+
 echo -------------------------========================-------------------------
 echo "Input name, directory and output name : (Debug helper)"
 ## Set working path.
 	dir=$(pwd)
+## file or folder selected
 	echo "Working dir : "$dir""
 	echo Input file : "$file"
 	export VAR="$file"
 	echo
+## directory section
+	INPUT="$(dirname "${VAR}")"	
+	echo "Get the last Folder : ${INPUT##*/}"
 	echo Base directory : "$(dirname "${VAR}")"
 	echo Base name: "$(basename "${VAR}")"
 	echo
@@ -197,98 +152,62 @@ echo "Input name, directory and output name : (Debug helper)"
 	echo "Output name bis : "$name1""
 	
 echo -------------------------========================-------------------------
-## Variables, for program.
+echo "The code program."
 
-	rm "/dev/shm/findfiles.txt"
-
-part=$((part+1))
-echo "-------------------------===== Section $part =====-------------------------"
-echo All lowercase for convert...
-	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
-
-part=$((part+1))
-echo "-------------------------===== Section $part =====-------------------------"
-	
-	## Working examples
-	#convert "$line" -resize 640x480^ -gravity center -crop 640x480+0+0 +repage "$line"-para-640x480.jpg
-	#convert "$line" -resize 800x600^ -gravity center -crop 800x600+0+0 +repage "$line"-para-800x600.jpg
-	#convert "$line" -resize 1024x768^ -gravity center -crop 1024x768+0+0 +repage "$line"-para-1024x768.jpg
-	#convert "$line" -resize 1600x1200^ -gravity center -crop 1600x1200+0+0 +repage "$line"-para-1600x1200.jpg
-
-	# 3840x2160 4k
-	# 7680x4320 8k
-	# 15360x8640 16k
-
-## find files
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo Finding files...
-	
-	## Easy way to add a file format, copy paste a new line.
-	
-	find $file -name '*.png'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.bmp'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	error $?
-	
-	cat "/dev/shm/findfiles.txt"
-
-echo Finding finish.
-
-debug $?
+	echo Delete temp files...
+	rm "/dev/shm/m3u.srt" 2> /dev/null
+	rm "/dev/shm/m3u.tmp" 2> /dev/null
 
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-echo "Code start, all resolution conversion in parallel."
+	echo "Finding files..."
+	echo file = "$file"
+	echo "(basename "${VAR}")" = "$(basename "${VAR}")"
 
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "4/3 resolution"
-input="/dev/shm/findfiles.txt"
-	while IFS= read -r "line"
-	do
-	echo "$line"
-	parallel -j $entry ::: "convert "$line" -resize 640x480^ -gravity center -crop 640x480+0+0 +repage "$line"-para-640x480.jpg" "convert "$line" -resize 800x600^ -gravity center -crop 800x600+0+0 +repage "$line"-para-800x600.jpg" "convert "$line" -resize 1024x768^ -gravity center -crop 1024x768+0+0 +repage "$line"-para-1024x768.jpg" "convert "$line" -resize 1600x1200^ -gravity center -crop 1600x1200+0+0 +repage "$line"-para-1600x1200.jpg"
-	done < "$input"
-	error $?
-	
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo "16/10 resolution"
-input="/dev/shm/findfiles.txt"
-	while IFS= read -r "line"
-	do
-	echo "$line"
-	parallel -j $entry ::: "convert "$line" -resize 1280x800^ -gravity center -crop 1280x800+0+0 +repage "$line"-para-1280x800.jpg" "convert "$line" -resize 1680x1050^ -gravity center -crop 1680x1050+0+0 +repage "$line"-para-1680x1050.jpg" "convert "$line" -resize 1920x1200^ -gravity center -crop 1920x1200+0+0 +repage "$line"-para-1920x1200.jpg"
-	done < "$input"
+	#find "$file" . -type f \( -name '*.mp3' -o -name '*.flac' -o -name '*.ac3' -o -name '*.dts' \) -printf "%P\n" > "$file"/"$(basename "${VAR}")".m3u
+	cd "$name" && find "$file" . -type f \( -name '*.mp3' -o -name '*.flac' -o -name '*.ac3' -o -name '*.mkv' \) -printf "%P\n" > "/dev/shm/m3u.tmp"
+	#find "$file" . -type f \( -name '*.mp3' -o -name '*.flac' -o -name '*.ac3' -o -name '*.mkv' \) -printf "%P\n" > "/dev/shm/m3u.tmp"	
 	error $?
 
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo "16/9 resolution"
-input="/dev/shm/findfiles.txt"
-	while IFS= read -r "line"
-	do
-	echo "$line"
-	parallel -j $entry ::: "convert "$line" -resize 1280x720^ -gravity center -crop 1280x720+0+0 +repage "$line"-para-1280x720.jpg" "convert "$line" -resize 1600x900^ -gravity center -crop 1600x900+0+0 +repage "$line"-para-1600x900.jpg" "convert "$line" -resize 1920x1080^ -gravity center -crop 1920x1080+0+0 +repage "$line"-para-1920x1080.jpg" "convert "$line" -resize 7680x4320^ -gravity center -crop 7680x4320+0+0 +repage "$line"-para-7680x4320.jpg"
-	done < "$input"
+	echo "Listing..."
+	sleep 1
+	#cat "$file"/"$(basename "${VAR}")".m3u
+	cat "/dev/shm/m3u.tmp"
 	error $?
 	
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo Dual screen
-	input="/dev/shm/findfiles.txt"
-	while IFS= read -r "line"
-	do
-	echo "$line"
-	convert "$line" -resize 3840x1080^ -gravity center -crop 3840x1080+0+0 +repage "$line"-para-3840x1080.jpg
-	done < "$input"
+	echo "Name sort (Yes or No (Suggest Yes))"
+	if zenity --question --no-wrap --text="Do you want to sort by file name ? (Yes or No (Suggest Yes))"
+	then
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		#sort "$file"/"$(basename "${VAR}")".m3u > "$file"/"$(basename "${VAR}")".m3v
+		sort -u "/dev/shm/m3u.tmp" > "/dev/shm/m3u.srt" 	## -u remove duplicate lines
+		cp "/dev/shm/m3u.srt" "$file"/"$(basename "${VAR}")".m3u
+		cat "$file"/"$(basename "${VAR}")".m3u
+		echo
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		echo "Files are sorted and m3u is in $file"
+	else
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		awk -i inplace '!seen[$0]++' "/dev/shm/m3u.tmp"		## remove duplicate lines
+		cp "/dev/shm/m3u.tmp" "$file"/"$(basename "${VAR}")".m3u
+		cat "$file"/"$(basename "${VAR}")".m3u
+		echo
+		part=$((part+1))
+		echo "-------------------------===== Section $part =====-------------------------"
+		echo "Files are NOT sorted and m3u is in $file"
+	fi
 	error $?
+	
+	echo Delete temp files...
+	rm "/dev/shm/m3u.srt" 2> /dev/null
+	rm "/dev/shm/m3u.tmp" 2> /dev/null
 
 echo -------------------------========================-------------------------
 ## Software lead out

@@ -22,11 +22,10 @@ echo -------------------------========================-------------------------
 	echo 2022-02-20_Sunday_12:22:54
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Convert ALL images to WEBP"
-	echo "File name : Convert ALL to WEBP.sh"
+	echo "Software name: Convert to WEBP"
+	echo "File name : Convert one to WEBP.sh"
 	echo
-	echo "What it does ?  Convert ALL to WEBP image format."
-	echo "Use folder select"
+	echo "What it does ? Convert 1 image to WEBP format."
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
 	echo "By LostByteSoft, no copyright or copyleft."
@@ -70,8 +69,8 @@ echo Function Error detector. If errorlevel is 1 or greater will show error msg.
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
+	#file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
 	## --file-filter="*.jpg *.gif"
 
 if test -z "$file"
@@ -109,55 +108,12 @@ echo "Get the last Folder :"
 	INPUT="$(dirname "${VAR}")"
 	echo ${INPUT##*/} 
 ## The code program.
-	rm "/dev/shm/findfiles.txt" 2> /dev/null
-
-part=$((part+1))
-echo "-------------------------===== Section $part =====-------------------------"
-echo All lowercase for convert...
-	#cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
-
-part=$((part+1))
-echo "-------------------------===== Section $part =====-------------------------"
-
-## find files
-part=$((part+1))
-echo "-------------------------===== Section $part =====-------------------------"
-echo Finding files...
-
-	## Easy way to add a file format, copy paste a new line.
-	echo "Will find files in sub folders too...."
-	find $file -name '*.png'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.bmp'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.avif'  >> "/dev/shm/findfiles.txt"
-	#find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
-	cat "/dev/shm/findfiles.txt"
-	echo	
-echo Finding finish, with file count :
-	wc -l < "/dev/shm/findfiles.txt"
-
-part=$((part+1))
-echo "-------------------------===== Section $part =====-------------------------"
-
-	echo Conversion started
-	
-	echo Simple convert 1 file at a time.
-	{
-	input="/dev/shm/findfiles.txt"
-		while IFS= read -r "line"
-		do
-		echo "$line"_convert.webp
-		convert "$line" -verbose -define webp:lossless=true -format webp "$line"_convert.webp
-		done < "$input"
-	}
+	part=$((part+1))
+	echo "-------------------------===== Section $part =====-------------------------"
+	echo convert $file -format webp "$name".webp
+	#convert $file -format webp  "$name".webp
+	convert "$file" -verbose -define webp:lossless=true -format webp "$name"_convert.webp
 	error $?
-
-echo Conversion finish...
 
 echo -------------------------========================-------------------------
 ## Software lead-out.
@@ -195,7 +151,6 @@ else
 	sleep 10
 fi
 	exit
-
 ## -----===== End of bash =====-----
 
 End-user license agreement (eula)

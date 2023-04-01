@@ -26,7 +26,7 @@ echo "Common variables, you can changes theses variables as you wish to test (0 
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
-	NOquit=0	# No quit after all operations.
+	NOquit=1	# No quit after all operations.
 
 	echo autoquit=$autoquit debug=$debug error=$error part=$part NOquit=$NOquit
 
@@ -35,8 +35,8 @@ echo -------------------------========================-------------------------
 	echo 2022-11-08_Tuesday_09:04:25
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Convert ALL images to WEBP +50 parallel"
-	echo "File name : Convert ALL to WEBP +50 (parallel).sh"
+	echo "Software name: Convert ALL images to WEBP parallel"
+	echo "File name : Convert ALL to WEBP (parallel).sh"
 	echo
 	echo "What it does ?  Convert ALL to WEBP image format with gnu parallel."
 	echo "Use folder select"
@@ -173,8 +173,8 @@ fi
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/Downloads/ --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/Downloads/ --title="Choose a directory to convert all file" --directory)
 	#file="/$HOME/Downloads"
 	## --file-filter="*.jpg *.gif"
 
@@ -228,6 +228,11 @@ echo "Input name, directory and output name : (Debug helper)"
 	debug $?
 	
 echo -------------------------========================-------------------------
+
+echo Remove temp files...
+	rm "/dev/shm/findfiles.txt" 2> /dev/null
+	rm "/dev/shm/findgif.txt" 2> /dev/null
+
 echo Gif finder...
 count=`ls -1 "$file"/*.gif 2>/dev/null | wc -l`
 	echo GIF files search and count is : $count
@@ -254,9 +259,6 @@ count=`ls -1 "$file"/*.gif 2>/dev/null | wc -l`
 
 echo -------------------------========================-------------------------
 ## The code program.
-echo Remove temp files...
-	rm "/dev/shm/findfiles.txt" 2> /dev/null
-	rm "/dev/shm/findgif.txt" 2> /dev/null
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
@@ -265,15 +267,16 @@ echo "Finding files... (NOT used to convert, just for your eyes.)"
 	## Easy way to add a file format, copy paste a new line.
 	echo "Will NOT find files in sub folders."
 	echo
-	find "$file" -maxdepth 1 -name '*.png'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.jpg'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.avif'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.bmp'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.gif'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.jpg'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.jpg_large'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.png'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.tif'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.tiff'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.webp'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.avif'  >> "/dev/shm/findfiles.txt"
 	echo
 	cat "/dev/shm/findfiles.txt"
 	echo	
@@ -332,7 +335,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo WEBP conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.webp
+	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.webp
 	fi
 	error $?
 	part=$((part+1))
@@ -341,7 +344,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPEG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.jpeg
+	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.jpeg
 	fi
 	error $?
 	part=$((part+1))
@@ -350,7 +353,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo BMP conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.bmp
+	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.bmp
 	fi
 	error $?
 	part=$((part+1))
@@ -359,7 +362,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.tif
+	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.tif
 	fi
 	error $?
 	part=$((part+1))
@@ -368,7 +371,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIFF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.tiff
+	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.tiff
 	fi
 	error $?
 	part=$((part+1))
@@ -377,7 +380,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.jpg
+	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.jpg
 	fi
 	error $?
 	part=$((part+1))
@@ -386,7 +389,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo GIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.gif
+	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.gif
 	fi
 	error $?
 	part=$((part+1))
@@ -395,7 +398,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo PNG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.png
+	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.png
 	fi
 	error $?
 	part=$((part+1))
@@ -404,7 +407,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo AVIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -verbose -resize 150% -define webp:lossless=true -format webp ::: "$file"/*.avif
+	parallel -j $entry mogrify -verbose -define webp:lossless=true -format webp ::: "$file"/*.avif
 	fi
 	error $?
 	part=$((part+1))
@@ -421,7 +424,7 @@ echo Move files to new folder?
 		part=$((part+1))
 		echo "-------------------------===== Section $part =====-------------------------"
 		echo Create folder...
-			mkdir -p ""$file"/webp50"
+			mkdir -p ""$file"/webp"
 			echo Move files...
 			echo ""$file"/'*.webp'" ""$file"/webp50"
 			mv ""$file"/"*.webp"" ""$file"/webp50"

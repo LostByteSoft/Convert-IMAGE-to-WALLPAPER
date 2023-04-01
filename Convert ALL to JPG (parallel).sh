@@ -26,7 +26,7 @@ echo "Common variables, you can changes theses variables as you wish to test (0 
 	debug=0		# test debug
 	error=0		# test error
 	part=0		# don't change this value
-	NOquit=0	# No quit after all operations.
+	NOquit=1	# No quit after all operations.
 
 	echo autoquit=$autoquit debug=$debug error=$error part=$part NOquit=$NOquit
 
@@ -36,7 +36,7 @@ echo -------------------------========================-------------------------
 	echo
 ## Software name, what is this, version, informations.
 	echo "Software name: Convert ALL images to WEBP parallel"
-	echo "File name : Convert ALL to WEBP (parallel).sh"
+	echo "File name : Convert ALL images to JPG (parallel).sh"
 	echo
 	echo "What it does ?  Convert ALL to WEBP image format with gnu parallel."
 	echo "Use folder select"
@@ -173,8 +173,8 @@ fi
 echo -------------------------========================-------------------------
 echo "Select filename using dialog !"
 
-	#file="$(zenity --file-selection --filename=$HOME/$USER --title="Select a file, all format supported")"
-	file=$(zenity  --file-selection --filename=$HOME/$USER --title="Choose a directory to convert all file" --directory)
+	#file="$(zenity --file-selection --filename=$HOME/Downloads/ --title="Select a file, all format supported")"
+	file=$(zenity  --file-selection --filename=$HOME/Downloads/ --title="Choose a directory to convert all file" --directory)
 	#file="/$HOME/Downloads"
 	## --file-filter="*.jpg *.gif"
 
@@ -223,38 +223,48 @@ echo "Input name, directory and output name : (Debug helper)"
 	name1=`echo "$(basename "${VAR}")" | rev | cut -f 2- -d '.' | rev` ## remove extension
 	echo "Output name bis : "$name1""
 	echo All lowercase for convert...
-	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
+	#cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
 	debug $?
 	
 echo -------------------------========================-------------------------
-echo Gif finder...
-count=`ls -1 "$file"/*.gif 2>/dev/null | wc -l`
+echo Remove temp files...
+	rm "/dev/shm/findfiles.txt" 2> /dev/null
+	rm "/dev/shm/findgif.txt" 2> /dev/null
+
+## 060_findgif_move.sh
+echo Gif finder... Mover
+
+	count=0
+	rm "/dev/shm/findgif.txt" 2> /dev/null
+
+count=`ls -1 "$file"/*gif* 2>/dev/null | wc -l`
 	echo GIF files search and count is : $count
-	find $file -name '*.gif'  >> "/dev/shm/findgif.txt"
-	cat "/dev/shm/findgif.txt"
 	if [ $count != 0 ]
 	then
-	if zenity --question --text="Gif files detected, do you want to rename them to *.gif.gif ?"
+	cd "$file" && find -name "*gif*"  >> "/dev/shm/findgif.txt"
+	cat "/dev/shm/findgif.txt"
+	if zenity --question --text="Gif files detected, do you want to MOVE them to "$HOME"/Desktop ?\n\n\tFiles are NOT JPG compatibles / UpScalables."
 		then
-			echo Finding files...
+			echo Moving files...
+			#cd "$file" && find -name "*gif*"  >> "/dev/shm/findgif.txt"
+			#cat "/dev/shm/findgif.txt"
 			echo
 			
 		{
 		input="/dev/shm/findgif.txt"
 		while IFS= read -r "line"
 		do
-		echo Output : "$line".gif
-		mv  "$line" "$line".gif
+		echo Output : "$HOME/Desktop/"$line""
+		mv  "$line" "$HOME"/Desktop/"$line"
 		done < "$input"
 		}
+		sleep 1
+	fi
+	fi
 	error $?
-	fi
-	fi
 
 echo -------------------------========================-------------------------
 ## The code program.
-echo Remove temp files...
-	rm "/dev/shm/findfiles.txt" 2> /dev/null
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
@@ -262,15 +272,16 @@ echo "Finding files... (NOT used to convert, just for your eyes.)"
 	echo
 	## Easy way to add a file format, copy paste a new line.
 	echo "Will NOT find files in sub folders."
-	find "$file" -maxdepth 1 -name '*.png'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.jpg'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.avif'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.bmp'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.gif'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.jpg'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.jpg_large'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -name '*.png'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.tif'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.tiff'  >> "/dev/shm/findfiles.txt"
 	find "$file" -maxdepth 1 -name '*.webp'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.avif'  >> "/dev/shm/findfiles.txt"
 	cat "/dev/shm/findfiles.txt"
 	echo	
 echo Finding finish, with file count :
@@ -323,7 +334,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPEG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.jpeg
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.jpeg
 	fi
 	error $?
 	part=$((part+1))
@@ -332,7 +343,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo BMP conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.bmp
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.bmp
 	fi
 	error $?
 	part=$((part+1))
@@ -341,7 +352,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.tif
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.tif
 	fi
 	error $?
 	part=$((part+1))
@@ -350,7 +361,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIFF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.tiff
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.tiff
 	fi
 	error $?
 	part=$((part+1))
@@ -359,7 +370,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.jpg
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.jpg
 	fi
 	error $?
 	part=$((part+1))
@@ -368,7 +379,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo WEBP conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.webp
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.webp
 	fi
 	error $?
 	part=$((part+1))
@@ -377,7 +388,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo GIF conversion and count is : $count
 	#if [ $count != 0 ]
 	#then
-	#parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.gif
+	#parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.gif
 	#fi
 	echo "(NOT converted)"
 	error $?
@@ -387,7 +398,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo PNG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.png
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.png
 	fi
 	error $?
 	part=$((part+1))
@@ -396,7 +407,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo AVIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify -resize 150% -format jpg -quality 95 ::: "$file"/*.avif
+	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.avif
 	fi
 	error $?
 	part=$((part+1))
@@ -404,25 +415,25 @@ echo "-------------------------===== Section $part =====------------------------
 	error $?
 echo Conversion finish...
 
-part=$((part+1))
-echo "-------------------------===== Section $part =====-------------------------"
-echo Move files to new folder?
+#part=$((part+1))
+#echo "-------------------------===== Section $part =====-------------------------"
+#echo Move files to new folder?
 	
-	if zenity --question --text="Do you want to move files to ""$file"/jpg50" ? (Yes or No))"
-	then
-		part=$((part+1))
-		echo "-------------------------===== Section $part =====-------------------------"
-		echo Create folder...
-			mkdir -p ""$file"/jpg50"
-			echo Move files...
-			echo ""$file"/'*.webp'" ""$file"/jpg50"
-			mv ""$file"/"*.webp"" ""$file"/jpg50"
-	else
-		part=$((part+1))
-		echo "-------------------------===== Section $part =====-------------------------"
-		echo "Files not moved."	
-	fi
-	error $?
+	#if zenity --question --text="Do you want to move files to ""$file"/jpg50" ? (Yes or No))"
+	#then
+	#	part=$((part+1))
+	#	echo "-------------------------===== Section $part =====-------------------------"
+	#	echo Create folder...
+	#		mkdir -p ""$file"/jpg50"
+	#		echo Move files...
+	#		echo ""$file"/'*.jpg'" ""$file"/jpg50"
+	#		mv """$file""/"*.jpg"" """$file""/jpg50"
+	#else
+	#	part=$((part+1))
+	#	echo "-------------------------===== Section $part =====-------------------------"
+	#	echo "Files not moved."	
+	#fi
+	#error $?
 
 echo -------------------------========================-------------------------
 ## Software lead-out.

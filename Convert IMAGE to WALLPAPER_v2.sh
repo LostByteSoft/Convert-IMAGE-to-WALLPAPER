@@ -143,16 +143,16 @@ echo "Code start"
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"	
 	echo "4/3 resolution"
-	#convert "$file" -resize 800x600^ -gravity center -crop 800x600+0+0 +repage "$name"-800x600.jpg
-	#convert "$file" -resize 1024x768^ -gravity center -crop 1024x768+0+0 +repage "$name"-1024x768.jpg
-	#convert "$file" -resize 1600x1200^ -gravity center -crop 1600x1200+0+0 +repage "$name"-1600x1200.jpg
+	convert "$file" -resize 800x600^ -gravity center -crop 800x600+0+0 +repage "$name"-800x600.jpg
+	convert "$file" -resize 1024x768^ -gravity center -crop 1024x768+0+0 +repage "$name"-1024x768.jpg
+	convert "$file" -resize 1600x1200^ -gravity center -crop 1600x1200+0+0 +repage "$name"-1600x1200.jpg
 		error $?
 	
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
 	echo "16/10 resolution"
-	#convert "$file" -resize 1280x800^ -gravity center -crop 1280x800+0+0 +repage "$name"-1280x800.jpg
-	#convert "$file" -resize 1680x1050^ -gravity center -crop 1680x1050+0+0 +repage "$name"-1680x1050.jpg
+	convert "$file" -resize 1280x800^ -gravity center -crop 1280x800+0+0 +repage "$name"-1280x800.jpg
+	convert "$file" -resize 1680x1050^ -gravity center -crop 1680x1050+0+0 +repage "$name"-1680x1050.jpg
 		error $?
 
 	part=$((part+1))
@@ -161,16 +161,16 @@ echo "Code start"
 	convert "$file" -resize 1600x900^ -gravity center -crop 1600x900+0+0 +repage "$name"-1600x900.jpg		# 16/9
 	convert "$file" -resize 1920x1080^ -gravity center -crop 1920x1080+0+0 +repage "$name"-1920x1080.jpg		# 1080p
 	convert "$file" -resize 3840x2160^ -gravity center -crop 3840x2160+0+0 +repage "$name"-3840x2160.jpg		# 4k
-	#convert "$file" -resize 7680x4320^ -gravity center -crop 7680x4320+0+0 +repage "$name"-7680x4320.jpg		# 8k
-	#convert "$file" -resize 15360×8640^ -gravity center -crop 15360×8640+0+0 +repage "$name"-15360×8640.jpg	# 16k
+	convert "$file" -resize 7680x4320^ -gravity center -crop 7680x4320+0+0 +repage "$name"-7680x4320.jpg		# 8k
+	convert "$file" -resize 15360×8640^ -gravity center -crop 15360×8640+0+0 +repage "$name"-15360×8640.jpg		# 16k
 		error $?
 		
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
 	echo "Special resolution, dual screen (2 x 1920x1080)"
-	#convert "$file" -resize 3840x1080^ -gravity center -crop 3840x1080+0+0 +repage "$name"-3840x1080.jpg
+	convert "$file" -resize 3840x1080^ -gravity center -crop 3840x1080+0+0 +repage "$name"-3840x1080.jpg
 	echo "Special resolution, dual screen (2 x 3840x2160)"
-	#convert "$file" -resize 7680x2160^ -gravity center -crop 7680x1080+0+0 +repage "$name"-7680x1080.jpg
+	convert "$file" -resize 7680x2160^ -gravity center -crop 7680x1080+0+0 +repage "$name"-7680x1080.jpg
 		error $?
 
 	fi
