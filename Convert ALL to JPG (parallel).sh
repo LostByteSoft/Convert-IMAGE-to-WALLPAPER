@@ -5,7 +5,7 @@
 	#printf '\033[8;40;125t'	# will resize the window, if needed.
 	printf '\033[8;40;150t'		# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
-	sleep 0.50
+	#sleep 0.50
 	
 echo -------------------------========================-------------------------
 echo "Software lead-in."
@@ -334,7 +334,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPEG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.jpeg
+	parallel -j $entry mogrify  -format jpg -quality 90 ::: "$file"/*.jpeg
 	fi
 	error $?
 	part=$((part+1))
@@ -343,7 +343,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo BMP conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.bmp
+	parallel -j $entry mogrify  -format jpg -quality 90 ::: "$file"/*.bmp
 	fi
 	error $?
 	part=$((part+1))
@@ -352,7 +352,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.tif
+	parallel -j $entry mogrify  -format jpg -quality 90 ::: "$file"/*.tif
 	fi
 	error $?
 	part=$((part+1))
@@ -361,7 +361,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo TIFF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.tiff
+	parallel -j $entry mogrify  -format jpg -quality 90 ::: "$file"/*.tiff
 	fi
 	error $?
 	part=$((part+1))
@@ -370,7 +370,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo JPG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.jpg
+	parallel -j $entry mogrify  -format jpg -quality 90 ::: "$file"/*.jpg
 	fi
 	error $?
 	part=$((part+1))
@@ -379,7 +379,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo WEBP conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.webp
+	parallel -j $entry mogrify  -format jpg -quality 90 ::: "$file"/*.webp
 	fi
 	error $?
 	part=$((part+1))
@@ -388,7 +388,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo GIF conversion and count is : $count
 	#if [ $count != 0 ]
 	#then
-	#parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.gif
+	#parallel -j $entry mogrify  -format jpg -quality 90 ::: "$file"/*.gif
 	#fi
 	echo "(NOT converted)"
 	error $?
@@ -398,7 +398,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo PNG conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.png
+	parallel -j $entry mogrify  -format jpg -quality 90 ::: "$file"/*.png
 	fi
 	error $?
 	part=$((part+1))
@@ -407,7 +407,7 @@ echo "-------------------------===== Section $part =====------------------------
 	echo AVIF conversion and count is : $count
 	if [ $count != 0 ]
 	then
-	parallel -j $entry mogrify  -format jpg -quality 95 ::: "$file"/*.avif
+	parallel -j $entry mogrify  -format jpg -quality 90 ::: "$file"/*.avif
 	fi
 	error $?
 	part=$((part+1))

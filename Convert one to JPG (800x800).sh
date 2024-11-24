@@ -253,12 +253,11 @@ echo "The core/code program."
 echo "Get the last Folder :"
 	INPUT="$(dirname "${VAR}")"
 	echo ${INPUT##*/} 
-## The code program.
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo convert $file -format webp "$name".webp
-	#convert $file -format webp  "$name".webp
-	convert "$file" -verbose -define webp:lossless=true -format webp "$name"_convert.webp
+
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo "convert "$file" -quality 95 "$name"_800.jpg"
+	convert "$file" -format jpg -resize 800x800 -quality 90 "$name"_800.jpg
 	error $?
 
 part=$((part+1))

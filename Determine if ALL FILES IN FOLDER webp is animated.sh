@@ -312,14 +312,16 @@ echo "Move files ?"
 		echo
 	fi
 	
-	if zenity --no-wrap --question --text="Do you want to COPY theseS fileS to $HOME/Desktop ?"
+	#if zenity --no-wrap --question --text="Do you want to COPY theseS fileS to $HOME/Desktop ?"
+	if zenity --no-wrap --question --text="Do you want to MOVE theseS fileS to $HOME/Desktop ?"
 	then
 		{
 		input="/dev/shm/findaniwebp.txt"
 			while IFS= read -r "line"
 				do
-				cp "$line" "$HOME"/Desktop
-				echo file moved...
+				#cp "$line" "$HOME"/Desktop
+				mv "$line" "$HOME"/Desktop
+				echo file MOVED...
 			done < "$input"
 		}
 	else

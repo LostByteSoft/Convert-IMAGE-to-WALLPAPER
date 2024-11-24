@@ -1,6 +1,5 @@
 #!/bin/bash
 #!/usr/bin/ffmpeg
-
 	start=$SECONDS
 	now=$(date +"%Y-%m-%d_%A_%H:%M:%S")
 
@@ -8,11 +7,6 @@ echo -------------------------===== Start of bash ====-------------------------
 	#printf '\033[8;40;90t'		# will resize the window, if needed.
 	printf '\033[8;40;100t'		# will resize the window, if needed.
 	#printf '\033[8;40;130t'	# will resize the window, if needed.
-	
-	echo
-	echo
-	me="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
-	echo "Running : $me"
 	
 	red=`tput setaf 1`
 	green=`tput setaf 2`
@@ -22,15 +16,13 @@ echo -------------------------===== Start of bash ====-------------------------
 
 	## General purposes variables. Watch before program to specific variables.
 	## All variables must be 0 or 1
-	autoquit=0	# autoquit anyway to script takes LESS than 2 min to complete. (0 or 1, change in conjoncture noquit=0)
+	autoquit=0	# autoquit anyway to script takes MORE than 2 min to complete. (0 or 1, change in conjoncture noquit=0)
 	debug=0		# test debug. (0 or 1 debug mode)
 	error=0		# test error. (0 or 1 make error)
 	noquit=0	# No quit after all operations. (0 or 1 noquit)
-	automatic=0
 
 	## Auto-generated variables.
 	random=$(shuf -i 4096-131072 -n 1)	# Used for temp folders. A big number hard to guess for security reasons.
-	random2=$RANDOM
 	part=0					# don't change this value. (0)
 	
 	echo
@@ -46,30 +38,24 @@ echo -------------------------===== Start of bash ====-------------------------
 	echo
 
 echo -------------------------========================-------------------------
-	echo Specific variables, you can change theses variables.
-	echo wol=1 	## (0 or 1, 1 skip)
-	wol=1 	## (0 or 1, 1 skip)
+## Software name, what is this, version, informations.
+	echo "Software name: Rename GIF to 000"
+	echo
+	echo What it does ?
+	echo "Rename name.gif ALL FOLDER to 000_name.gif"
+	echo
+	echo "This is a multiples file conversion"
 	echo
 	echo "Read me for this file (and known bugs) :"
-	echo
-	echo "This software could use theses softwares:"
-	echo
-	echo "Use ffmpeg https://ffmpeg.org/ffmpeg.html"
-	echo "Use ImageMagik https://imagemagick.org/index.php"
-	echo "Use Gnu Parallel https://www.gnu.org/software/parallel/"
-	echo
-	echo "Options https://trac.ffmpeg.org/wiki/Encode/H.264"
-	echo "4k demo HDR https://www.demolandia.net"
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
 	echo "By LostByteSoft, no copyright or copyleft. https://github.com/LostByteSoft"
 	echo
 	echo "Don't hack paid software, free software exists and does the job better."
 	echo
-
 echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2024-02-09_Friday_09:54:19
+	echo 2023-04-04_Tuesday_07:53:33
 echo -------------------------========================-------------------------
 echo "Color codes / Informations."
 	echo
@@ -80,9 +66,7 @@ echo "Color codes / Informations."
 	echo
 
 echo -------------------------========================-------------------------
-echo "Functions codes and color"
-	echo
-	echo 	"Function ${blue}█████${reset} Debug. Activate via source program debug=1."
+echo Function ${blue}█████${reset} Debug. Activate via source program debug=1.
 
 	debug()
 	if [ "$debug" -ge 1 ]; then
@@ -91,7 +75,11 @@ echo "Functions codes and color"
 		echo
 		echo autoquit=$autoquit debug=$debug error=$error noquit=$quit count=$count part=$part random=$random
 		echo
-		echo file = $file
+		echo cpu = $cpu defa = $defa defi = $defi defv = $defv defs = $defx defz = $defz
+		echo
+		echo file = $file1
+		echo
+		echo Basedir = "$BASEDIR"
 		echo 
 		read -n 1 -s -r -p "Press any key to continue"
 		echo
@@ -105,7 +93,7 @@ echo "Functions codes and color"
 		echo
 	fi
 
-	echo 	"Function ${red}█████${reset} Error detector. Errorlevel show error msg."
+echo Function ${red}█████${reset} Error detector. Errorlevel show error msg.
 
 	error()
 	if [ "$?" -ge 1 ]; then
@@ -116,45 +104,18 @@ echo "Functions codes and color"
 		echo "!!! ERROR was detected !!! Press ANY key to try to CONTINUE !!! Will probably exit !!!"
 		echo
 		debug=1
-		noquit=1
-		autoquit=0
 		read -n 1 -s -r -p "Press any key to CONTINUE"
 		echo
 	fi
 
-	echo 	"Function ${green}█████${reset} Auto Quit. If autoquit=1 will automaticly quit."
+echo Function ${green}█████${reset} Auto Quit. If autoquit=1 will automaticly quit.
 	if [ "$autoquit" -eq "1" ]; then
 		echo
-		echo "${green}█████████████████████████ AUTO QUIT ACTIVATED █████████████████████████${reset}"
-		echo
-	fi
-
-	if [ "$automatic" -eq "1" ]; then
-		echo
-		echo "${yellow}███████████████████████████ AUTOMATIC ACTIVATED ████████████████████████${reset}"
+		echo "${green}████████████████████████████ AUTO QUIT ACTIVATED █████████████████████████${reset}"
 		echo
 	fi
 	echo
 
-echo -------------------------========================-------------------------
-
-if command -v imagemagick >/dev/null 2>&1
-	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
-		echo
-		echo "${red}████████████████ Dependency error ████████████████${reset}"
-		echo
-		read -n 1 -s -r -p "Press ENTER key to continue anyway (NOT a good idea) !"
-		echo
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
-		echo "${green} ████████████████ OK ████████████████ ${reset}"
-		echo
-	fi
-
-	echo
 echo -------------------------========================-------------------------
 echo "Names not supported / Informations."
 	echo
@@ -167,8 +128,8 @@ echo -------------------------========================-------------------------
 echo "Select folder or filename using dialog !"
 	echo
 
-	file="$(zenity --file-selection --file-filter="*.jpg *.gif *.jpeg *.webp *.png *.gif *.bmp" --filename=$HOME/ --title="Select a file, all format supported")"	## File select.
-	## file=$(zenity  --file-selection --filename=$HOME/ --title="Choose a directory to convert all file" --directory)	## Directory select.
+	##file="$(zenity --file-selection --file-filter="*.jpg *.gif *.jpeg *.webp *.png *.gif" --filename=$HOME/ --title="Select a file, all format supported")"	## File select.
+	file=$(zenity  --file-selection --filename=$HOME/ --title="Choose a directory to convert all file" --directory)	## Directory select.
 	## file="/$HOME/Pictures/"
 	## file="/$HOME/Downloads/"
 	## --file-filter="*.jpg *.gif *.jpeg"
@@ -207,11 +168,6 @@ echo "Select folder or filename using dialog !"
 			exit
 		fi
 
-	if [ $logs -eq 1 ]; then
-		echo "Selected : $file" >> /dev/shm/$random2.txt
-		echo "	" >> /dev/shm/$random2.txt
-	fi
-
 echo -------------------------========================-------------------------
 ## Input_Directory_Output
 	echo "Input name, directory and output name : (Debug helper)"
@@ -243,46 +199,43 @@ echo -------------------------========================-------------------------
 	echo
 
 ## Debug data
-	echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random logs=$logs"
+	echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random file=$file"
 	echo
+
+echo -------------------------========================-------------------------
+echo "All lowercase for convert... (NOT activated, remove both # to activate)"
+	echo
+	## This line put all lowercase FROM selected folder to the files names.
+	#echo "cd "$file1" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;"
+	#cd "$file1" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
 
 echo -------------------------========================-------------------------
 echo "The core/code program."
 	echo
+	
+	echo Rename started, 1 file at a time.
+	echo
+	cd "$name"
 
-echo "Get the last Folder :"
-	INPUT="$(dirname "${VAR}")"
-	echo ${INPUT##*/} 
-## The code program.
-	part=$((part+1))
-	echo "-------------------------===== Section $part =====-------------------------"
-	echo convert $file -format webp "$name".webp
-	#convert $file -format webp  "$name".webp
-	convert "$file" -verbose -define webp:lossless=true -format webp "$name"_convert.webp
-	error $?
+	for file in *.gif
+		do
+			mv "$file" "0A0_${file%.gif}.gif"
+			echo "	$file" "		000_${file%.gif}.gif"
+		done
+		
+	echo
+	#cat $file
+	echo
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
-## Software lead out
-
-	echo
-	echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random random2=$random2 logs=$logs"
-	echo
-	echo "Finish... with numbers of actions : $part"
-	echo "This script take $(( SECONDS - start )) seconds to complete."
-	date=$(date -d@$(( SECONDS - start )) -u +%H:%M:%S)
-	echo "Time needed: $date"
-	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
-	echo "Current time : $now"
-	echo
-
-echo -------------------------========================-------------------------
-	echo
 	echo "If a script takes MORE than 120 seconds to complete it will ask"
 	echo "you to press ENTER to terminate."
 	echo
 	echo "If a script takes LESS than 120 seconds to complete it will auto"
 	echo "terminate after 10 seconds"
+	echo
+	echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random"
 	echo
 
 echo -------------------------===== End of Bash ======-------------------------

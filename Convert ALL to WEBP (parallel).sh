@@ -5,7 +5,7 @@
 	#printf '\033[8;40;125t'	# will resize the window, if needed.
 	printf '\033[8;40;150t'		# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
-	sleep 0.50
+	#sleep 0.50
 	
 echo -------------------------========================-------------------------
 echo "Software lead-in."

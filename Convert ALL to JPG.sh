@@ -5,7 +5,7 @@
 	#printf '\033[8;40;80t'		# will resize the window, if needed.
 	printf '\033[8;40;100t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
-	sleep 0.50
+	#sleep 0.50
 	
 echo -------------------------========================-------------------------
 ## Software lead-in
@@ -130,14 +130,16 @@ echo Finding files...
 
 	## Easy way to add a file format, copy paste a new line.
 	echo "Will find files in sub folders too...."
-	find $file -name '*.png'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.bmp'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tif'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.tiff'  >> "/dev/shm/findfiles.txt"
-	find $file -name '*.webp'  >> "/dev/shm/findfiles.txt"
+	find "$file" -iname '*.AVIF'  >> "/dev/shm/findfiles.txt"		## Compatibility problems, not fully supported
+	find "$file" -iname '*.BMP'  >> "/dev/shm/findfiles.txt"
+	find "$file" -iname '*.GIF'  >> "/dev/shm/findfiles.txt"
+	find "$file" -iname '*.JPEG'  >> "/dev/shm/findfiles.txt"
+	find "$file" -iname '*.JPG_LARGE'  >> "/dev/shm/findfiles.txt"
+	find "$file" -iname '*.JPG'  >> "/dev/shm/findfiles.txt"
+	find "$file" -iname '*.PNG'  >> "/dev/shm/findfiles.txt"
+	find "$file" -iname '*.TIF'  >> "/dev/shm/findfiles.txt"
+	find "$file" -iname '*.TIFF'  >> "/dev/shm/findfiles.txt"
+	find "$file" -iname '*.WEBP'  >> "/dev/shm/findfiles.txt"
 	cat "/dev/shm/findfiles.txt"
 	echo	
 echo Finding finish, with file count :
@@ -151,7 +153,8 @@ echo "-------------------------===== Section $part =====------------------------
 	input="/dev/shm/findfiles.txt"
 		while IFS= read -r "line"
 		do
-		echo Output : "$line"_convert.png
+		echo Output : "$line"_convert.jpg
+		#echo Output : "$line"_convert.png
 		convert "$line" -format jpg -quality 95 "$line"_convert.jpg
 		#convert "$line" -format png "$line"_convert.png
 		done < "$input"

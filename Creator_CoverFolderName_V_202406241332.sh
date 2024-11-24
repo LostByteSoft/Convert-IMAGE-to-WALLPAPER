@@ -1,38 +1,34 @@
 #!/bin/bash
 #!/usr/bin/ffmpeg
-
 	start=$SECONDS
 	now=$(date +"%Y-%m-%d_%A_%H:%M:%S")
-
+	me=$(basename "$0")
+	
 echo -------------------------===== Start of bash ====-------------------------
-	#printf '\033[8;40;90t'		# will resize the window, if needed.
 	printf '\033[8;40;100t'		# will resize the window, if needed.
+	#printf '\033[8;40;115t'	# will resize the window, if needed.
 	#printf '\033[8;40;130t'	# will resize the window, if needed.
-	
-	echo
-	echo
-	me="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
-	echo "Running : $me"
-	
+
 	red=`tput setaf 1`
 	green=`tput setaf 2`
 	yellow=`tput setaf 11`
 	blue=`tput setaf 12`
+	orange=`tput setaf sgr9`
 	reset=`tput sgr0`
 
 	## General purposes variables. Watch before program to specific variables.
 	## All variables must be 0 or 1
-	autoquit=0	# autoquit anyway to script takes LESS than 2 min to complete. (0 or 1, change in conjoncture noquit=0)
-	debug=0		# test debug. (0 or 1 debug mode)
-	error=0		# test error. (0 or 1 make error)
-	noquit=0	# No quit after all operations. (0 or 1 noquit)
-	automatic=0
+	debug=0		## test debug. (0 or 1 debug mode)
+	error=0		## test error. (0 or 1 make error)
+	noquit=0	## noquit option. (0 or 1)
+	automatic=0	## automatic without (at least minimal) dialog box.
 
-	## Auto-generated variables.
-	random=$(shuf -i 4096-131072 -n 1)	# Used for temp folders. A big number hard to guess for security reasons.
-	random2=$RANDOM
-	part=0					# don't change this value. (0)
-	
+	## Auto-generated variables. Don't change theses variables.
+	random=$(shuf -i 4096-131072 -n 1)	## Used for temp folders. A big number hard to guess for security reasons.
+	part=0					## don't change this value. (0)
+	random2=$RANDOM				## Normal random
+	primeerror=0				## ending error detector
+
 	echo
 	echo "Software lead-in. LostByteSoft ; https://github.com/LostByteSoft"
 	echo
@@ -42,34 +38,25 @@ echo -------------------------===== Start of bash ====-------------------------
 	echo "Current time : $now"
 	echo
 	echo "Common variables, you can changes theses variables as you wish to test."
-	echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random"
+	echo "Debug data : debug=$debug error=$error part=$part noquit=$noquit random=$random random2=$random2 primeerror=$primeerror"
+	me="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
+	echo
+	echo "Running job file :"
+	echo
+	echo $(dirname "$0")/$me
 	echo
 
-echo -------------------------========================-------------------------
-	echo Specific variables, you can change theses variables.
-	echo wol=1 	## (0 or 1, 1 skip)
-	wol=1 	## (0 or 1, 1 skip)
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo Specific softwares variables, you can change theses variables.
 	echo
-	echo "Read me for this file (and known bugs) :"
+	echo automatic=0 , 0 or 1 , 0 deactivated , 1 activated
+	automatic=0
+	echo noquit=0 , 0 or 1 , 0 deactivated , 1 activated
+	noquit=0
 	echo
-	echo "This software could use theses softwares:"
-	echo
-	echo "Use ffmpeg https://ffmpeg.org/ffmpeg.html"
-	echo "Use ImageMagik https://imagemagick.org/index.php"
-	echo "Use Gnu Parallel https://www.gnu.org/software/parallel/"
-	echo
-	echo "Options https://trac.ffmpeg.org/wiki/Encode/H.264"
-	echo "4k demo HDR https://www.demolandia.net"
-	echo
-	echo "Informations : (EULA at the end of file, open in text.)"
-	echo "By LostByteSoft, no copyright or copyleft. https://github.com/LostByteSoft"
-	echo
-	echo "Don't hack paid software, free software exists and does the job better."
-	echo
-
-echo -------------------------========================-------------------------
 	echo Version compiled on : Also serves as a version
-	echo 2024-02-09_Friday_09:54:19
+	echo 2024-06-24_Monday_13:32:13
 echo -------------------------========================-------------------------
 echo "Color codes / Informations."
 	echo
@@ -84,82 +71,93 @@ echo "Functions codes and color"
 	echo
 	echo 	"Function ${blue}█████${reset} Debug. Activate via source program debug=1."
 
-	debug()
-	if [ "$debug" -ge 1 ]; then
+	debug() {
 		echo
-		echo "${blue}█████████████████████████████████ DEBUG ██████████████████████████████████${reset}"
+		echo "Debug data : debug=$debug error=$error part=$part noquit=$noquit random=$random random2=$random2 automatic=$automatic primeerror=$primeerror"
 		echo
-		echo autoquit=$autoquit debug=$debug error=$error noquit=$quit count=$count part=$part random=$random
-		echo
-		echo file = $file
-		echo 
-		read -n 1 -s -r -p "Press any key to continue"
-		echo
-	fi
-	
+		}
+
 	if [ "$debug" -eq "1" ]; then
 		echo
-		echo "${blue}██████████████████████████████ DEBUG ACTIVATED ███████████████████████████${reset}"
+		echo "${blue}██████████████████████████████ DEBUG ACTIVATED AT START ███████████████████████████${reset}"
 		echo
-		echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random"
-		echo
-	fi
+		fi
 
 	echo 	"Function ${red}█████${reset} Error detector. Errorlevel show error msg."
 
 	error()
 	if [ "$?" -ge 1 ]; then
-		part=$((part+1))
+		noquit=1
+		primeerror=$((primeerror+1))
+		error=1
 		echo
 		echo "${red}█████████████████████████████████ ERROR $part █████████████████████████████████${reset}"
 		echo
-		echo "!!! ERROR was detected !!! Press ANY key to try to CONTINUE !!! Will probably exit !!!"
+		echo "Debug data : debug=$debug error=$error part=$part noquit=$noquit random=$random random2=$random2 automatic=$automatic primeerror=$primeerror"
 		echo
-		debug=1
-		noquit=1
-		autoquit=0
+		echo "!!! ERROR was detected !!! Press ANY key to try to CONTINUE !!!"
+		echo
 		read -n 1 -s -r -p "Press any key to CONTINUE"
 		echo
-	fi
-
-	echo 	"Function ${green}█████${reset} Auto Quit. If autoquit=1 will automaticly quit."
-	if [ "$autoquit" -eq "1" ]; then
-		echo
-		echo "${green}█████████████████████████ AUTO QUIT ACTIVATED █████████████████████████${reset}"
-		echo
-	fi
+		fi
 
 	if [ "$automatic" -eq "1" ]; then
 		echo
-		echo "${yellow}███████████████████████████ AUTOMATIC ACTIVATED ████████████████████████${reset}"
+		echo "${green}███████████████████████████ AUTOMATIC ACTIVATED ████████████████████████${reset}"
 		echo
-	fi
-	echo
+		fi
 
+echo
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+## Simple function small bar to wait 3 sec.
+	## Version 1.03
+	## Part of code came from here https://github.com/rabb1t/spinners , Created by Pavel Raykov aka 'rabbit' / 2018-11-08 (c)
+
+	functionsmallbar()
+		{
+		if [ "$debug" -eq 0 ]; then
+			#echo
+			width=40
+			perc=0
+			speed="0.1" # seconds
+			inc="$(echo "100/${width}" | bc -ql)"
+			#echo -n "	Wake Up.. 0% "
+			echo -n "	Wait... "
+
+			while [ $width -ge 0 ]; do
+				printf "\e[0;93;103m%s\e[0m %.0f%%" "0" "${perc}"
+				sleep $speed
+				let width--
+				perc="$(echo "${perc}+${inc}" | bc -ql)"
+		
+				if [ ${perc%%.*} -lt 10 ]; then
+					printf "\b\b\b"
+				else
+					printf "\b\b\b\b"
+				fi
+			done
+			echo
+		else
+			echo ${blue} ████████████████████ DEBUG BYPASS ALL BARS ████████████████████${reset}
+		fi
+		}
+
+## -------------------------========================-------------------------
+	echo Check installed requirements !
+	echo
 echo -------------------------========================-------------------------
-
-if command -v imagemagick >/dev/null 2>&1
-	then
-		echo "You don't have ' imagemagick ' installed, now exit in 10 seconds."
-		echo "Add with : sudo apt-get install imagemagick"
-		echo
-		echo "${red}████████████████ Dependency error ████████████████${reset}"
-		echo
-		read -n 1 -s -r -p "Press ENTER key to continue anyway (NOT a good idea) !"
-		echo
-	else
-		echo "imagemagick installed continue."
-		dpkg -s imagemagick | grep Version
-		echo "${green} ████████████████ OK ████████████████ ${reset}"
-		echo
-	fi
-
+echo "All lowercase for convert... (NOT activated, remove both # to activate)"
 	echo
+	## This line put all lowercase FROM selected folder to the files names.
+	#echo "cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;"
+	#cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
+
 echo -------------------------========================-------------------------
 echo "Names not supported / Informations."
 	echo
 	echo "${blue}	████████████████████████████████████████████████████████████████${reset}"
-	echo "	!!! NAMES starting with - . _ , or symbols are NOT SUPPORTED !!!"
+	echo "		!!! NAMES starting with symbols are NOT SUPPORTED !!!"
 	echo "${blue}	████████████████████████████████████████████████████████████████${reset}"
 	echo
 
@@ -207,11 +205,6 @@ echo "Select folder or filename using dialog !"
 			exit
 		fi
 
-	if [ $logs -eq 1 ]; then
-		echo "Selected : $file" >> /dev/shm/$random2.txt
-		echo "	" >> /dev/shm/$random2.txt
-	fi
-
 echo -------------------------========================-------------------------
 ## Input_Directory_Output
 	echo "Input name, directory and output name : (Debug helper)"
@@ -243,30 +236,48 @@ echo -------------------------========================-------------------------
 	echo
 
 ## Debug data
-	echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random logs=$logs"
+	echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random"
 	echo
 
 echo -------------------------========================-------------------------
-echo "The core/code program."
+echo "The code program. Playlist creator."
 	echo
-
-echo "Get the last Folder :"
+	## Variables, for program."
+	echo "Get the last Folder :"
 	INPUT="$(dirname "${VAR}")"
 	echo ${INPUT##*/} 
+
 ## The code program.
+
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
-	echo convert $file -format webp "$name".webp
-	#convert $file -format webp  "$name".webp
-	convert "$file" -verbose -define webp:lossless=true -format webp "$name"_convert.webp
+	echo "Copy and convert files."
+	echo cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
+	echo cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
+	echo cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
+	cp "$file" """$(dirname "${VAR}")""/Folder.jpg"
+	cp "$file" """$(dirname "${VAR}")""/Cover.jpg"
+	cp "$file" """$(dirname "${VAR}")""/${INPUT##*/}".jpg
 	error $?
+	echo
+
+	part=$((part+1))
+	echo "-------------------------===== Section $part =====-------------------------"
+	echo "Copy and convert files."
+	echo mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
+	echo mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
+	echo mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
+	mogrify -resize 1000x1000 """$(dirname "${VAR}")""/Folder.jpg"
+	mogrify -resize 500x500 """$(dirname "${VAR}")""/Cover.jpg"
+	mogrify -resize 750x750 """$(dirname "${VAR}")""/${INPUT##*/}.jpg"
+	error $?
+	echo
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
-## Software lead out
-
+echo "Software lead out."
 	echo
-	echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random random2=$random2 logs=$logs"
+	echo "Debug data : debug=$debug error=$error part=$part noquit=$noquit random=$random random2=$random2 primeerror=$primeerror"
 	echo
 	echo "Finish... with numbers of actions : $part"
 	echo "This script take $(( SECONDS - start )) seconds to complete."
@@ -275,65 +286,62 @@ echo "-------------------------===== Section $part =====------------------------
 	now=$(date +"%Y-%m-%d_%A_%I:%M:%S")
 	echo "Current time : $now"
 	echo
-
-echo -------------------------========================-------------------------
-	echo
-	echo "If a script takes MORE than 120 seconds to complete it will ask"
-	echo "you to press ENTER to terminate."
-	echo
-	echo "If a script takes LESS than 120 seconds to complete it will auto"
-	echo "terminate after 10 seconds"
-	echo
+	echo "$date $now $me" >>/dev/shm/logs.txt
+	echo "	Debug data : debug=$debug error=$error part=$part noquit=$noquit random=$random random2=$random2 automatic=$automatic primeerror=$primeerror" >>/dev/shm/logs.txt
+	echo "	File (If present) : $file" >>/dev/shm/logs.txt
+	echo " " >>/dev/shm/logs.txt
 
 echo -------------------------===== End of Bash ======-------------------------
 ## Exit, wait or auto-quit.
+
+	if [ "$primeerror" -ge "1" ]; then
+		echo
+		echo "	${red}████████████████████████████████████████████${reset}"
+		echo "	${red}██                                        ██${reset}"
+		echo "	${red}██           ERROR ERROR ERROR            ██${reset}"
+		echo "	${red}██                                        ██${reset}"
+		echo "	${red}████████████████████████████████████████████${reset}"
+		echo
+		echo "Numbers of error(s) : $primeerror"
+		echo
+		functionsmallbar
+		echo
+		read -n 1 -s -r -p "Press ENTER key to Continue !"
+		echo
+	else
+		echo
+		echo "	${green}████████████████████████████████████████${reset}	${blue}████████████████████████████████████████${reset}"
+		echo "	${green}██                                    ██${reset}	${blue}██                                    ██${reset}"
+		echo "	${green}██         NO errors detected.        ██${reset}	${blue}██       Time needed : $date       ██${reset}"
+		echo "	${green}██                                    ██${reset}	${blue}██                                    ██${reset}"
+		echo "	${green}████████████████████████████████████████${reset}	${blue}████████████████████████████████████████${reset}"
+		echo
+	fi
+
 	if [ "$noquit" -eq "1" ]; then
 		echo
 		echo "${blue}	█████████████████ NO exit activated ███████████████████${reset}"
 		echo
 		read -n 1 -s -r -p "Press ENTER key to exit !"
+		echo
 		exit
 		fi
 
-	if [ "$autoquit" -eq "1" ]
-		then
-			echo
-			echo "${green}	███████████████ Finish, quit in 3 seconds █████████████████${reset}"
-			echo
-			sleep 2
-			echo
-		else
-		{
-			if [ "$debug" -eq "1" ]; then
-				echo
-				echo "${blue}		█████ DEBUG WAIT | Program finish. █████${reset}"
-				echo
-				echo "Debug data : autoquit=$autoquit debug=$debug error=$error part=$part noquit=$noquit random=$random"
-				echo
-				read -n 1 -s -r -p "Press ENTER key to continue !"
-				echo
-			fi
-		if [ $(( SECONDS - start )) -gt 120 ]
-			then
-				echo
-				echo "Script takes more than 120 seconds to complete."
-				echo
-				echo "${blue}	█████████████████████ Finish ███████████████████████${reset}"
-				echo
-				read -n 1 -s -r -p "Press ENTER key to exit !"
-				echo
-			else
-				echo
-				echo "Script takes less than 120 seconds to complete."
-				echo
-				echo "${green}	█████████████████████ Finish ███████████████████████${reset}"
-				echo
-				echo "Auto-quit in 3 sec. (You can press X)"
-				echo
-				sleep 3
-			fi
-		}
+	if [ "$debug" -eq "1" ]; then
+		debug
+		echo "${blue}		█████ DEBUG WAIT | Program finish. █████${reset}"
+		echo
+		read -n 1 -s -r -p "Press ENTER key to continue !"
+		echo
 		fi
+
+	echo
+	echo "${green}	███████████████ Finish, quit in 3 seconds █████████████████${reset}"
+	sleep 0.5
+	echo
+	functionsmallbar
+	echo
+	sleep 1
 	exit
 
 ## -----===== Start of eula =====-----

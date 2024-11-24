@@ -5,7 +5,7 @@
 	#printf '\033[8;40;80t'		# will resize the window, if needed.
 	printf '\033[8;40;100t'	# will resize the window, if needed.
 	#printf '\033[8;50;200t'	# will resize the window, if needed.
-	sleep 0.50
+	#sleep 0.50
 	
 echo -------------------------========================-------------------------
 ## Software lead-in
@@ -22,7 +22,7 @@ echo -------------------------========================-------------------------
 	echo 2022-02-20_Sunday_12:22:54
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Convert ALL to JPG 1500px"
+	echo "Software name: Convert ALL to JPG 2000px"
 	echo "File name : Convert ALL to JPG (2000x2000).sh"
 	echo
 	echo "What it does ?  Convert ALL to JPG image format."
@@ -125,17 +125,18 @@ part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 
 	## Easy way to add a file format, copy paste a new line.
-	echo "Will NOT find files in sub folders."
-	find "$file" -maxdepth 1 -name '*.avif'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.bmp'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.gif'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.jpeg'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.jpg'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.jpg_large'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.png'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.tif'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.tiff'  >> "/dev/shm/findfiles.txt"
-	find "$file" -maxdepth 1 -name '*.webp'  >> "/dev/shm/findfiles.txt"
+	echo "Will NOT find files in sub folders... Remove -maxdepth 1 to search subfolders."
+
+	#find "$file" -maxdepth 1 -iname '*.AVIF'  >> "/dev/shm/findfiles.txt"		## Compatibility problems, not fully supported
+	find "$file" -maxdepth 1 -iname '*.BMP'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.GIF'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.JPEG'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.JPG_LARGE'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.JPG'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.PNG'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.TIF'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.TIFF'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.WEBP'  >> "/dev/shm/findfiles.txt"
 	cat "/dev/shm/findfiles.txt"
 	echo	
 echo Finding finish, with file count :
