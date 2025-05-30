@@ -413,7 +413,9 @@ echo "-------------------------===== Section $part =====------------------------
 	part=$((part+1))
 	echo "-------------------------===== Section $part =====-------------------------"
 	error $?
+
 echo Conversion finish...
+	rm "/dev/shm/findfiles.txt" 2> /dev/null
 
 #part=$((part+1))
 #echo "-------------------------===== Section $part =====-------------------------"

@@ -4,7 +4,7 @@
 	#printf '\033[8;30;80t'		# will resize the window, if needed.
 	#printf '\033[8;40;80t'		# will resize the window, if needed.
 	printf '\033[8;40;100t'	# will resize the window, if needed.
-	#printf '\033[8;50;200t'	# will resize the window, if needed.
+	#printf '\033[8;50;800t'	# will resize the window, if needed.
 	#sleep 0.50
 	
 echo -------------------------========================-------------------------
@@ -22,18 +22,11 @@ echo -------------------------========================-------------------------
 	echo 2022-02-20_Sunday_12:22:54
 	echo
 ## Software name, what is this, version, informations.
-	echo "Software name: Convert ALL to JPG (or any image format you want)"
-	echo "File name : file Convert ALL to JPG.sh"
+	echo "Software name: Convert ALL to JPG 10000px"
+	echo "File name : Convert ALL to JPG (10000x10000).sh"
 	echo
-	echo "What it does ? Take all image in a specified folder ans convert it to"
-	echo "PNG image format."
-	echo
-	echo "Read me for this file (and known bugs) :"
-	echo
-	echo "You can edit this file to convert to ANY image format (supported by imgick."
-	echo
-	echo "Known bug or limitations, could not remove the original file extension."
-	echo
+	echo "What it does ?  Convert ALL to JPG image format."
+	echo "Use folder select"
 	echo
 	echo "Informations : (EULA at the end of file, open in text.)"
 	echo "By LostByteSoft, no copyright or copyleft."
@@ -118,28 +111,32 @@ echo "Get the last Folder :"
 ## The code program.
 	rm "/dev/shm/findfiles.txt" 2> /dev/null
 
+## find files
+part=$((part+1))
+echo "-------------------------===== Section $part =====-------------------------"
+echo Finding files...
+
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 echo All lowercase for convert...
-	cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
+	#cd "$file" && find . -name '*.*' -exec sh -c ' a=$(echo "$0" | sed -r "s/([^.]*)\$/\L\1/"); [ "$a" != "$0" ] && mv "$0" "$a" ' {} \;
 
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 
-echo Finding files...
-
 	## Easy way to add a file format, copy paste a new line.
-	echo "Will find files in sub folders too...."
-	find "$file" -iname '*.AVIF'  >> "/dev/shm/findfiles.txt"		## Compatibility problems, not fully supported
-	find "$file" -iname '*.BMP'  >> "/dev/shm/findfiles.txt"
-	find "$file" -iname '*.GIF'  >> "/dev/shm/findfiles.txt"
-	find "$file" -iname '*.JPEG'  >> "/dev/shm/findfiles.txt"
-	find "$file" -iname '*.JPG_LARGE'  >> "/dev/shm/findfiles.txt"
-	find "$file" -iname '*.JPG'  >> "/dev/shm/findfiles.txt"
-	find "$file" -iname '*.PNG'  >> "/dev/shm/findfiles.txt"
-	find "$file" -iname '*.TIF'  >> "/dev/shm/findfiles.txt"
-	find "$file" -iname '*.TIFF'  >> "/dev/shm/findfiles.txt"
-	find "$file" -iname '*.WEBP'  >> "/dev/shm/findfiles.txt"
+	echo "Will NOT find files in sub folders... Remove -maxdepth 1 to search subfolders."
+
+	#find "$file" -maxdepth 1 -iname '*.AVIF'  >> "/dev/shm/findfiles.txt"		## Compatibility problems, not fully supported
+	find "$file" -maxdepth 1 -iname '*.BMP'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.GIF'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.JPEG'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.JPG_LARGE'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.JPG'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.PNG'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.TIF'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.TIFF'  >> "/dev/shm/findfiles.txt"
+	find "$file" -maxdepth 1 -iname '*.WEBP'  >> "/dev/shm/findfiles.txt"
 	cat "/dev/shm/findfiles.txt"
 	echo	
 echo Finding finish, with file count :
@@ -148,15 +145,15 @@ echo Finding finish, with file count :
 part=$((part+1))
 echo "-------------------------===== Section $part =====-------------------------"
 
-	echo Conversion started... Simple convert 1 file at a time.
+	echo Conversion started
+	
+	echo Simple convert 1 file at a time.
 	{
 	input="/dev/shm/findfiles.txt"
 		while IFS= read -r "line"
 		do
-		echo Output : "$line"_convert.jpg
-		#echo Output : "$line"_convert.png
-		convert "$line" -format jpg -quality 95 "$line"_convert.jpg
-		#convert "$line" -format png "$line"_convert.png
+		echo "$line".jpg
+		convert "$line" -format jpg -resize 800x800 "$line"-800x800.jpg
 		done < "$input"
 	}
 	error $?

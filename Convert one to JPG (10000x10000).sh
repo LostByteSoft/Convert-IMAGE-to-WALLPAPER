@@ -26,6 +26,7 @@ echo -------------------------===== Start of bash ====-------------------------
 	debug=0		# test debug. (0 or 1 debug mode)
 	error=0		# test error. (0 or 1 make error)
 	noquit=0	# No quit after all operations. (0 or 1 noquit)
+	logs=1
 	automatic=0
 
 	## Auto-generated variables.
